@@ -232,7 +232,9 @@ static RectFS update_back_r, update_channel_r, update_action_r;
 static RectFS settings_row_r[5], language_chip_r, remap_row_r[6], remap_back_r;
 static RectFS remap_page_r;
 static RectFS screen_row_r[4], screen_back_r;
-static RectFS cinema_back_r;
+static RectFS cinema_back_r, gameover_load_r, cinema_card_r;
+static bool gameover_panel_shown = true;
+static int gameover_panel_module = -1;
 static RectFS developer_row_r[6], developer_back_r, developer_tests_r;
 // Test scenarios: the developer menu's list, opened with Start or its chip.
 static bool scenario_mode;
@@ -638,9 +640,36 @@ static bool try_load_art(void) {
 
 // panels
 
+static void draw_settings_row(RectFS *row, bool armed);
+static void draw_button_label(RectFS r, const char *label, float scale);
+static void draw_back_arrow(RectFS r);
+
 static void draw_cinema(void) {
   fill_rect(0, 0, W, H, COL_BOX & 0xff000000u);  // black
   draw_frame(12 * u, 12 * u, W - 24 * u, H - 24 * u, 2 * u, COL_GOLD_DARK);
+
+  int module = SS_GetModule() & 0xFF;
+  bool gameover_cinema = (module == 0x12 || module == 0x14) &&
+                         mode_for_module(module) == MODE_CINEMA;
+  if (gameover_cinema && gameover_panel_shown) {
+    RectFS panel = {10 * u, 10 * u, W - 20 * u, H - 20 * u};
+    cinema_card_r = (RectFS){0};
+    cinema_back_r = (RectFS){panel.x + 8, panel.y + 8, 56, 26};
+    draw_settings_row(&cinema_back_r, false);
+    draw_back_arrow(cinema_back_r);
+
+    gameover_load_r = (RectFS){16, H * 0.62f, W - 32, 68};
+    draw_settings_row(&gameover_load_r, false);
+    uint32_t now = SDL_GetTicks();
+    const char *label = now < state_flash_until && state_flash != kUi_Done
+      ? UI_Text(state_flash) : UI_Text(kUi_LoadState);
+    draw_button_label(gameover_load_r, label, 4 * u);
+    return;
+  }
+
+  cinema_back_r = (RectFS){0};
+  gameover_load_r = (RectFS){0};
+  cinema_card_r = (RectFS){12 * u, 12 * u, W - 24 * u, H - 24 * u};
   if (!tex_triforce) return;
 
   SDL_SetTextureColorMod(tex_triforce,255,255,255);
@@ -1355,10 +1384,24 @@ static void draw_developer_panel(RectFS r) {
     show_fps ? UI_Text(kUi_On) : UI_Text(kUi_Off),
     UI_Text(kUi_Open),
   };
+  RectFS save_row = settings_option_row(r, 1, 6);
+  RectFS load_row = settings_option_row(r, 2, 6);
+  float pair_gap = 3;
+  float left_w = floorf((save_row.w - pair_gap) / 2);
+  float pair_h = save_row.h + pair_gap + load_row.h;
+  developer_row_r[1] = (RectFS){save_row.x, save_row.y, left_w, pair_h};
+  developer_row_r[2] = (RectFS){save_row.x + left_w + pair_gap, save_row.y,
+                                save_row.w - left_w - pair_gap, pair_h};
+
   for (int i = 0; i < 6; i++) {
     RectFS *row = &developer_row_r[i];
-    *row=settings_option_row(r,i,6);
-    draw_option(row, labels[i], values[i]);
+    if (i == 1 || i == 2) {
+      draw_settings_row(row, false);
+      draw_button_label(*row, values[i][0] ? values[i] : labels[i], 4 * u);
+    } else {
+      *row=settings_option_row(r,i,6);
+      draw_option(row, labels[i], values[i]);
+    }
   }
 }
 
@@ -1468,7 +1511,7 @@ static void draw_developer_overlay_panel(RectFS r) {
   snprintf(model, sizeof(model), "DESKTOP");
   snprintf(core, sizeof(core), "N A");
 #endif
-  snprintf(version, sizeof(version), "%s", ZELDA3_3DS_VERSION);
+  snprintf(version, sizeof(version), "%s-aj1", ZELDA3_3DS_VERSION);
   snprintf(fps_now, sizeof(fps_now), "%d", ss_diag_current_fps);
   snprintf(fps_avg, sizeof(fps_avg), "%d", ss_diag_average_fps);
   snprintf(display, sizeof(display), "%s", display_mode_label());
@@ -2633,6 +2676,29 @@ static void apply_tap(float x, float y) {
   if (update_mode && Updater_Busy()) goto settings_tap;
 #endif
   if (ui_mode != MODE_GAME) {
+    if ((module == 0x12 || module == 0x14) &&
+        gameover_panel_module == module && tab != TAB_SETTINGS) {
+      if (gameover_panel_shown) {
+        if (in_rect(&cinema_back_r, x, y)) {
+          gameover_panel_shown = false;
+          return;
+        }
+        if (in_rect(&gameover_load_r, x, y)) {
+          if (SS_HasSaveState()) {
+            SS_SaveLoadState(false);
+            state_flash = kUi_StateLoaded;
+            state_flash_until = SDL_GetTicks() + 1200;
+          } else {
+            state_flash = kUi_NoState;
+            state_flash_until = SDL_GetTicks() + 1500;
+          }
+          return;
+        }
+      } else if (in_rect(&cinema_card_r, x, y)) {
+        gameover_panel_shown = true;
+        return;
+      }
+    }
     if (tab != TAB_SETTINGS) {
       tab = TAB_SETTINGS;
       leave_settings_submenu();
@@ -3163,6 +3229,15 @@ static void draw_second_screen(int logic_frames) {
 
   bool dungeon_mode = indoors;
   int ui_mode = mode_for_module(module);
+  bool gameover_cinema = ui_mode == MODE_CINEMA &&
+                         (module == 0x12 || module == 0x14);
+  if (gameover_cinema) {
+    if (gameover_panel_module != module)
+      gameover_panel_shown = true;
+    gameover_panel_module = module;
+  } else {
+    gameover_panel_module = -1;
+  }
   if (module == 0x12 || module <= 0x05) has_last_outdoor = false;
   // houses/caves have no dungeon map: keep the overworld view frozen at the door.
   // The special overworld screens (>= 0x80: Master Sword glade, Zora's Domain,
