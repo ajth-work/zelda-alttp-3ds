@@ -2144,7 +2144,32 @@ static int TestFooterRead(SDL_RWops *file) {
   return index;
 }
 
+typedef struct SaveTimingDiagnostics {
+  Uint32 serialize_ms;
+  Uint32 header_ms;
+  Uint32 input_log_ms;
+  Uint32 base_snapshot_ms;
+  Uint32 state_array_ms;
+  Uint32 randomizer_tail_ms;
+  Uint32 footer_ms;
+  uint64 header_bytes;
+  uint64 input_log_bytes;
+  uint64 base_snapshot_bytes;
+  uint64 state_array_bytes;
+  uint64 randomizer_tail_bytes;
+  uint64 footer_bytes;
+  uint32 total_frames;
+  uint32 input_log_size;
+} SaveTimingDiagnostics;
+static SaveTimingDiagnostics g_save_timing;
+static Uint32 g_load_timing_ms;
+static uint64 g_load_file_bytes;
+
 void StateRecorder_Load(StateRecorder *sr, SDL_RWops *f, bool replay_mode) {
+  Uint32 load_start_ticks=SDL_GetTicks();
+  Sint64 load_file_size=SDL_RWsize(f);
+  g_load_timing_ms=0;
+  g_load_file_bytes=load_file_size>=0?(uint64)load_file_size:0;
   // todo: fix robustness on invalid data.
   uint32 hdr[8] = { 0 };
   ReadFromFile(f, hdr, sizeof(hdr));
@@ -2208,7 +2233,7 @@ void StateRecorder_Load(StateRecorder *sr, SDL_RWops *f, bool replay_mode) {
 
   g_test_scenario_index=TestFooterRead(f);
   g_test_scenario_active=g_test_scenario_index>=0;
-
+  g_load_timing_ms=SDL_GetTicks()-load_start_ticks;
 }
 
 /*void StateRecorder_Save(StateRecorder *sr, FILE *f) {
@@ -2242,11 +2267,20 @@ void StateRecorder_Load(StateRecorder *sr, SDL_RWops *f, bool replay_mode) {
 void StateRecorder_ClearKeyLog(StateRecorder *sr);
 
 void StateRecorder_Save(StateRecorder* sr, SDL_RWops* rwops) {
+  Uint32 phase_start;
+  size_t write_count;
+  Sint64 tail_start_pos, tail_end_pos;
+  bool tail_saved;
+  memset(&g_save_timing, 0, sizeof(g_save_timing));
   if (Placement_GetActive() && sr->base_snapshot.size == 0)
     StateRecorder_ClearKeyLog(sr);
+  g_save_timing.total_frames=sr->total_frames;
+  g_save_timing.input_log_size=(uint32)sr->log.size;
   uint32 hdr[8] = { 0 };
   ByteArray arr = { 0 };
+  phase_start=SDL_GetTicks();
   SaveSnesState(&saveFunc, &arr);
+  g_save_timing.serialize_ms=SDL_GetTicks()-phase_start;
   assert(sr->base_snapshot.size == 0 || sr->base_snapshot.size == arr.size);
 
   hdr[0] = 1;
@@ -2263,16 +2297,38 @@ void StateRecorder_Save(StateRecorder* sr, SDL_RWops* rwops) {
     hdr[5] |= sr->replay_pos_last_complete << 1;
     hdr[7] = sr->replay_frame_counter;
   }
-  SDL_RWwrite(rwops, hdr, sizeof(hdr), 1);
-  SDL_RWwrite(rwops, sr->log.data, hdr[2], 1);
-  SDL_RWwrite(rwops, sr->base_snapshot.data, sr->base_snapshot.size, 1);
-  SDL_RWwrite(rwops, arr.data, arr.size, 1);
+  phase_start=SDL_GetTicks();
+  write_count=SDL_RWwrite(rwops, hdr, sizeof(hdr), 1);
+  g_save_timing.header_ms=SDL_GetTicks()-phase_start;
+  g_save_timing.header_bytes=(uint64)write_count*sizeof(hdr);
+  phase_start=SDL_GetTicks();
+  write_count=SDL_RWwrite(rwops, sr->log.data, hdr[2], 1);
+  g_save_timing.input_log_ms=SDL_GetTicks()-phase_start;
+  g_save_timing.input_log_bytes=(uint64)write_count*hdr[2];
+  phase_start=SDL_GetTicks();
+  write_count=SDL_RWwrite(rwops, sr->base_snapshot.data, sr->base_snapshot.size, 1);
+  g_save_timing.base_snapshot_ms=SDL_GetTicks()-phase_start;
+  g_save_timing.base_snapshot_bytes=(uint64)write_count*sr->base_snapshot.size;
+  phase_start=SDL_GetTicks();
+  write_count=SDL_RWwrite(rwops, arr.data, arr.size, 1);
+  g_save_timing.state_array_ms=SDL_GetTicks()-phase_start;
+  g_save_timing.state_array_bytes=(uint64)write_count*arr.size;
 
-  if (!RandoSnapshotTail_SaveRW(rwops))
+  tail_start_pos=SDL_RWtell(rwops);
+  phase_start=SDL_GetTicks();
+  tail_saved=RandoSnapshotTail_SaveRW(rwops);
+  g_save_timing.randomizer_tail_ms=SDL_GetTicks()-phase_start;
+  tail_end_pos=SDL_RWtell(rwops);
+  if(tail_start_pos>=0&&tail_end_pos>=tail_start_pos)
+    g_save_timing.randomizer_tail_bytes=(uint64)(tail_end_pos-tail_start_pos);
+  if (!tail_saved)
     fprintf(stderr, "Unable to append randomizer snapshot metadata\n");
   if(g_test_scenario_active) {
     uint8 footer[kTestFooterSize];TestFooterEncode(footer);
-    SDL_RWwrite(rwops,footer,1,sizeof(footer));
+    phase_start=SDL_GetTicks();
+    write_count=SDL_RWwrite(rwops,footer,1,sizeof(footer));
+    g_save_timing.footer_ms=SDL_GetTicks()-phase_start;
+    g_save_timing.footer_bytes=(uint64)write_count;
   }
   ByteArray_Destroy(&arr);
 }
@@ -2721,10 +2777,31 @@ void ZeldaFormatSavePath(const char *name, char *path, size_t size) {
 #endif
 }
 
+static void SaveTimingLogLine(const char *line) {
+  char log_path[256];
+  ZeldaFormatSavePath("saves/save_timing.log", log_path, sizeof(log_path));
+  FILE *log_file=fopen(log_path, "a");
+  if(log_file) {
+    fputs(line, log_file);
+    fclose(log_file);
+  }
+  printf("%s", line);
+}
+
 void SaveLoadSlot(int cmd, int which) {
   char name[128];
   char path[256];
   SDL_RWops* rwops;
+  const char *operation=cmd==kSaveLoad_Save?"save":cmd==kSaveLoad_Load?"load":"replay";
+  Uint32 total_start=SDL_GetTicks();
+  Uint32 open_start=SDL_GetTicks();
+  Uint32 open_ms;
+  Uint32 close_start;
+  Uint32 close_ms=0;
+  Uint32 total_ms;
+  uint64 file_bytes_read=0;
+  Uint32 load_ms=0;
+  char timing_line[1024];
 
   if (which & 256) {
     if (cmd == kSaveLoad_Save)
@@ -2736,16 +2813,56 @@ void SaveLoadSlot(int cmd, int which) {
 
   ZeldaFormatSavePath(name, path, sizeof(path));
   rwops = SDL_RWFromFileInExternal(path, cmd != kSaveLoad_Save ? "rb" : "wb");
+  open_ms=SDL_GetTicks()-open_start;
+  if(!rwops) {
+    total_ms=SDL_GetTicks()-total_start;
+    snprintf(timing_line, sizeof(timing_line),
+             "op=%s slot=%d status=open_failed open_ms=%u close_ms=0 total_ms=%u file_bytes=0\n",
+             operation, which, open_ms, total_ms);
+    SaveTimingLogLine(timing_line);
+    return;
+  }
   if (rwops) {
     printf("*** %s slot %d\n",
            cmd == kSaveLoad_Save ? "Saving" : cmd == kSaveLoad_Load ? "Loading" : "Replaying", which);
 
-    if (cmd != kSaveLoad_Save)
+    if (cmd != kSaveLoad_Save) {
       StateRecorder_Load(&state_recorder, rwops, cmd == kSaveLoad_Replay);
-    else
+      file_bytes_read=g_load_file_bytes;
+      load_ms=g_load_timing_ms;
+    } else {
       StateRecorder_Save(&state_recorder, rwops);
+    }
 
+    close_start=SDL_GetTicks();
     SDL_RWclose(rwops);
+    close_ms=SDL_GetTicks()-close_start;
+    total_ms=SDL_GetTicks()-total_start;
+    if(cmd==kSaveLoad_Save) {
+      uint64 file_bytes=g_save_timing.header_bytes+
+        g_save_timing.input_log_bytes+
+        g_save_timing.base_snapshot_bytes+
+        g_save_timing.state_array_bytes+
+        g_save_timing.randomizer_tail_bytes+
+        g_save_timing.footer_bytes;
+      snprintf(timing_line, sizeof(timing_line),
+               "op=save slot=%d open_ms=%u serialize_ms=%u write_header_ms=%u write_header_bytes=%llu write_input_log_ms=%u write_input_log_bytes=%llu write_base_snapshot_ms=%u write_base_snapshot_bytes=%llu write_state_array_ms=%u write_state_array_bytes=%llu write_randomizer_tail_ms=%u write_randomizer_tail_bytes=%llu write_footer_ms=%u write_footer_bytes=%llu close_ms=%u total_ms=%u total_frames=%u input_log_size=%u file_bytes=%llu\n",
+               which, open_ms, g_save_timing.serialize_ms,
+               g_save_timing.header_ms, (unsigned long long)g_save_timing.header_bytes,
+               g_save_timing.input_log_ms, (unsigned long long)g_save_timing.input_log_bytes,
+               g_save_timing.base_snapshot_ms, (unsigned long long)g_save_timing.base_snapshot_bytes,
+               g_save_timing.state_array_ms, (unsigned long long)g_save_timing.state_array_bytes,
+               g_save_timing.randomizer_tail_ms, (unsigned long long)g_save_timing.randomizer_tail_bytes,
+               g_save_timing.footer_ms, (unsigned long long)g_save_timing.footer_bytes,
+               close_ms, total_ms, g_save_timing.total_frames, g_save_timing.input_log_size,
+               (unsigned long long)file_bytes);
+    } else {
+      snprintf(timing_line, sizeof(timing_line),
+               "op=%s slot=%d open_ms=%u load_ms=%u close_ms=%u total_ms=%u file_bytes_read=%llu\n",
+               operation, which, open_ms, load_ms, close_ms, total_ms,
+               (unsigned long long)file_bytes_read);
+    }
+    SaveTimingLogLine(timing_line);
 #ifdef __3DS__
     // Older builds wrote slot 0 even in naming/credits. Recover those boots
     // through the ordinary clean reset, which reloads SRAM from disk.

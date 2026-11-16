@@ -1511,7 +1511,7 @@ static void draw_developer_overlay_panel(RectFS r) {
   snprintf(model, sizeof(model), "DESKTOP");
   snprintf(core, sizeof(core), "N A");
 #endif
-  snprintf(version, sizeof(version), "%s-aj1", ZELDA3_3DS_VERSION);
+  snprintf(version, sizeof(version), "%s", ZELDA3_3DS_VERSION);
   snprintf(fps_now, sizeof(fps_now), "%d", ss_diag_current_fps);
   snprintf(fps_avg, sizeof(fps_avg), "%d", ss_diag_average_fps);
   snprintf(display, sizeof(display), "%s", display_mode_label());
