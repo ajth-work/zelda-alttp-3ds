@@ -236,7 +236,12 @@ static RectFS screen_row_r[4], screen_back_r;
 static RectFS cinema_back_r, gameover_load_r, cinema_card_r;
 static bool gameover_panel_shown = true;
 static int gameover_panel_module = -1;
-static RectFS developer_row_r[6], developer_back_r, developer_tests_r;
+#ifdef __3DS__
+enum { kDeveloperPanelRows = 8 };
+#else
+enum { kDeveloperPanelRows = 6 };
+#endif
+static RectFS developer_row_r[kDeveloperPanelRows], developer_back_r, developer_tests_r;
 // Test scenarios: the developer menu's list, opened with Start or its chip.
 static bool scenario_mode;
 static int scenario_selected, scenario_first;
@@ -1131,6 +1136,14 @@ static RectFS settings_option_row(RectFS panel,int index,int count) {
   return (RectFS){panel.x+8,top+index*(height+gap),panel.w-16,height};
 }
 
+static RectFS developer_option_row(RectFS panel,int index,int count) {
+  const int gap=3;
+  int height=floorf((panel.h-42-(count-1)*gap)/count);
+  int block=count*height+(count-1)*gap;
+  int top=lroundf(panel.y+34+(panel.h-34-block)/2);
+  return (RectFS){panel.x+8,top+index*(height+gap),panel.w-16,height};
+}
+
 static void draw_panel_title(RectFS r,const char *title,int left,int right) {
   RectFS box={r.x+left,r.y+8,r.w-left-right,26};
   NativeMenuPanel(menu_button_span,NULL,box.x,box.y,box.w,box.h);
@@ -1373,20 +1386,27 @@ static void draw_developer_panel(RectFS r) {
               load_result == kZeldaDumpStateInvalid ? kUi_InvalidState :
               load_result == kZeldaDumpStateWrongRom ? kUi_WrongGame : kUi_IoError) : UI_Text(kUi_Load));
   bool flash = now < state_flash_until;
-  const char *labels[6] = {
+  const char *labels[kDeveloperPanelRows] = {
     UI_Text(kUi_MemDump), UI_Text(kUi_SaveState), UI_Text(kUi_LoadState),
     UI_Text(kUi_LoadDiagnostic), UI_Text(kUi_ShowFps), UI_Text(kUi_Overlay),
+#ifdef __3DS__
+    "Swap ZL/ZR", "Swap QS/QL buttons",
+#endif
   };
-  const char *values[6] = {
+  const char *values[kDeveloperPanelRows] = {
     now < dump_flash_until ? UI_Text(kUi_Done) : UI_Text(kUi_Write),
     flash && state_flash == kUi_Done ? UI_Text(kUi_Done) : "",
     flash && state_flash != kUi_Done ? UI_Text(state_flash) : "",
     load_result == -1 || (load_result >= 0 && now >= load_flash_until) ? "" : load_value,
     show_fps ? UI_Text(kUi_On) : UI_Text(kUi_Off),
     UI_Text(kUi_Open),
+#ifdef __3DS__
+    Platform3DS_GetSwapZlZr() ? UI_Text(kUi_On) : UI_Text(kUi_Off),
+    Platform3DS_GetSwapQuickStateButtons() ? UI_Text(kUi_On) : UI_Text(kUi_Off),
+#endif
   };
-  RectFS save_row = settings_option_row(r, 1, 6);
-  RectFS load_row = settings_option_row(r, 2, 6);
+  RectFS save_row = developer_option_row(r, 1, kDeveloperPanelRows);
+  RectFS load_row = developer_option_row(r, 2, kDeveloperPanelRows);
   float pair_gap = 3;
   float left_w = floorf((save_row.w - pair_gap) / 2);
   float pair_h = save_row.h + pair_gap + load_row.h;
@@ -1394,13 +1414,13 @@ static void draw_developer_panel(RectFS r) {
   developer_row_r[2] = (RectFS){save_row.x + left_w + pair_gap, save_row.y,
                                 save_row.w - left_w - pair_gap, pair_h};
 
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < kDeveloperPanelRows; i++) {
     RectFS *row = &developer_row_r[i];
     if (i == 1 || i == 2) {
       draw_settings_row(row, false);
       draw_button_label(*row, values[i][0] ? values[i] : labels[i], 4 * u);
     } else {
-      *row=settings_option_row(r,i,6);
+      *row=developer_option_row(r,i,kDeveloperPanelRows);
       draw_option(row, labels[i], values[i]);
     }
   }
@@ -2080,6 +2100,14 @@ static void draw_quick_state_flash(float tab_h) {
                             lroundf(y), lroundf(height)), scale);
 }
 
+static bool quick_state_buttons_swapped(void) {
+#ifdef __3DS__
+  return Platform3DS_GetSwapQuickStateButtons();
+#else
+  return false;
+#endif
+}
+
 static void draw_tab_bar(float tab_h, bool quick_state_buttons) {
   float y = H - tab_h + 4 * u;
   float bh = tab_h - 16 * u;
@@ -2089,13 +2117,20 @@ static void draw_tab_bar(float tab_h, bool quick_state_buttons) {
   if (quick_state_buttons) {
     float corner_w = 62 * u;
     float corner_gap = 4 * u;
-    quick_save_r = (RectFS){4 * u, y, corner_w, bh};
-    quick_load_r = (RectFS){W - 4 * u - corner_w, y, corner_w, bh};
-    draw_quick_state_button(quick_save_r, "S", "SAVE");
-    draw_quick_state_button(quick_load_r, "L", "LOAD");
+    RectFS quick_left_r = {4 * u, y, corner_w, bh};
+    RectFS quick_right_r = {W - 4 * u - corner_w, y, corner_w, bh};
+    if (quick_state_buttons_swapped()) {
+      quick_save_r = quick_right_r;
+      quick_load_r = quick_left_r;
+    } else {
+      quick_save_r = quick_left_r;
+      quick_load_r = quick_right_r;
+    }
+    draw_quick_state_button(quick_save_r, "QS", "SAVE");
+    draw_quick_state_button(quick_load_r, "QL", "LOAD");
     sq = fminf(bh, 52 * u);
-    x0 = quick_save_r.x + quick_save_r.w + corner_gap;
-    xr = quick_load_r.x - corner_gap;
+    x0 = quick_left_r.x + quick_left_r.w + corner_gap;
+    xr = quick_right_r.x - corner_gap;
     tgap = 4 * u;
     label_scale = 1.5f * u;
   } else {
@@ -3065,6 +3100,17 @@ settings_tap:
         request_bottom_redraw(kBottomRedrawFull);
 #endif
       }
+#ifdef __3DS__
+      else if (in_rect(&developer_row_r[6], x, y)) {
+        bool swapped = !Platform3DS_GetSwapZlZr();
+        Platform3DS_SetSwapZlZr(swapped);
+        update_ini("[General]", "SwapZlZr", swapped ? "1" : "0");
+      } else if (in_rect(&developer_row_r[7], x, y)) {
+        bool swapped = !Platform3DS_GetSwapQuickStateButtons();
+        Platform3DS_SetSwapQuickStateButtons(swapped);
+        update_ini("[General]", "SwapQuickStateButtons", swapped ? "1" : "0");
+      }
+#endif
     } else {
       if(in_rect(&cinema_back_r,x,y)) {
         tab=TAB_MAP;leave_settings_submenu();

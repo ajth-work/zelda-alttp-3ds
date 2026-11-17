@@ -85,6 +85,8 @@ static bool g_runtime_wide_edge_seen;
 static enum Platform3DSCStickMode g_cstick_mode = kPlatform3DSCStickTurbo;
 static int g_turbo_multiplier = 5;
 static bool g_show_fps;
+static bool g_swap_zl_zr;
+static bool g_swap_quick_state_buttons;
 static bool g_autosave = true;
 static int g_turbo_control = kTurboControlAuto;
 static bool g_reset_requested;
@@ -361,84 +363,21 @@ static bool CStickIsHeld(u32 keys) {
 
 void SecondScreenSDL_QuickSaveLoad(bool save);
 
-static int CStickFlickDirection(u32 keys) {
-  if (keys & KEY_CSTICK_LEFT)
-    return -1;
-  if (keys & KEY_CSTICK_RIGHT)
-    return 1;
-  if (g_irrst_initialized) {
-    circlePosition cstick = {0};
-    hidCstickRead(&cstick);
-    if (cstick.dx < -24)
-      return -1;
-    if (cstick.dx > 24)
-      return 1;
-  }
-  return 0;
-}
+static void HandleQuickStateShoulderButtons(u32 keys) {
+  static bool zl_was_held;
+  static bool zr_was_held;
+  bool zl_held = (keys & KEY_ZL) != 0;
+  bool zr_held = (keys & KEY_ZR) != 0;
+  bool zl_pressed = zl_held && !zl_was_held;
+  bool zr_pressed = zr_held && !zr_was_held;
+  zl_was_held = zl_held;
+  zr_was_held = zr_held;
 
-static void HandleQuickStateCStickFlick(u32 keys) {
-  enum { kFlickMaxMs = 250, kDoubleFlickMs = 500 };
-  static int flick_direction;
-  static uint64_t flick_started_ms;
-  static bool blocked_until_center;
-  static bool right_flick_pending;
-  static uint64_t right_flick_ms;
-
-  if (!g_is_new_3ds) {
-    flick_direction = 0;
-    blocked_until_center = false;
-    right_flick_pending = false;
-    return;
-  }
-
-  uint64_t now_ms = osGetTime();
-  int direction = CStickFlickDirection(keys);
-  if (blocked_until_center) {
-    if (!direction)
-      blocked_until_center = false;
-    return;
-  }
-  if (!flick_direction) {
-    if (direction) {
-      flick_direction = direction;
-      flick_started_ms = now_ms;
-    }
-    return;
-  }
-  if (direction == flick_direction) {
-    if (now_ms - flick_started_ms > kFlickMaxMs) {
-      flick_direction = 0;
-      blocked_until_center = true;
-      right_flick_pending = false;
-    }
-    return;
-  }
-  if (direction) {
-    flick_direction = 0;
-    blocked_until_center = true;
-    right_flick_pending = false;
-    return;
-  }
-
-  int completed_direction = flick_direction;
-  uint64_t held_ms = now_ms - flick_started_ms;
-  flick_direction = 0;
-  if (held_ms > kFlickMaxMs) {
-    right_flick_pending = false;
-    return;
-  }
-
-  if (completed_direction < 0) {
-    right_flick_pending = false;
-    SecondScreenSDL_QuickSaveLoad(true);
-  } else if (right_flick_pending &&
-             now_ms - right_flick_ms <= kDoubleFlickMs) {
-    right_flick_pending = false;
-    SecondScreenSDL_QuickSaveLoad(false);
-  } else {
-    right_flick_pending = true;
-    right_flick_ms = now_ms;
+  // Ignore simultaneous shoulder presses; each button acts once per press.
+  if (zl_pressed && !zr_held) {
+    SecondScreenSDL_QuickSaveLoad(!Platform3DS_GetSwapZlZr());
+  } else if (zr_pressed && !zl_held) {
+    SecondScreenSDL_QuickSaveLoad(Platform3DS_GetSwapZlZr());
   }
 }
 
@@ -465,7 +404,7 @@ uint32_t SS_GetDeathOverlay(void);
 uint16_t Platform3DS_ReadInput(bool *turbo_held, int *turbo_multiplier) {
   hidScanInput();
   u32 keys = hidKeysHeld();
-  HandleQuickStateCStickFlick(keys);
+  HandleQuickStateShoulderButtons(keys);
   static uint64_t old_3ds_x_hold_start_ms;
   static bool old_3ds_x_was_held;
   static bool old_3ds_x_turbo_was_active;
@@ -628,6 +567,10 @@ static void LoadRuntimeSetting(const char *key, const char *value) {
     if (multiplier > 5)
       multiplier = 5;
     g_turbo_multiplier = multiplier;
+  } else if (strcasecmp(key, "SwapZlZr") == 0) {
+    ParseBool(value, &g_swap_zl_zr);
+  } else if (strcasecmp(key, "SwapQuickStateButtons") == 0) {
+    ParseBool(value, &g_swap_quick_state_buttons);
   } else if (strcasecmp(key, "ShowFps") == 0) {
     bool show = false;
     if (ParseBool(value, &show))
@@ -674,6 +617,8 @@ void Platform3DS_LoadRuntimeSettings(void) {
   g_display_mode_legacy_stretch = false;
   g_runtime_wide_edge_seen = false;
   g_show_fps = false;
+  g_swap_zl_zr = false;
+  g_swap_quick_state_buttons = false;
   FILE *file = fopen("zelda3.ini", "rb");
   if (!file) {
     UI_SetLanguage(MenuLanguageFromSystem());
@@ -895,6 +840,22 @@ bool Platform3DS_GetShowFps(void) {
 
 void Platform3DS_SetShowFps(bool show) {
   g_show_fps = show;
+}
+
+bool Platform3DS_GetSwapZlZr(void) {
+  return g_swap_zl_zr;
+}
+
+void Platform3DS_SetSwapZlZr(bool swapped) {
+  g_swap_zl_zr = swapped;
+}
+
+bool Platform3DS_GetSwapQuickStateButtons(void) {
+  return g_swap_quick_state_buttons;
+}
+
+void Platform3DS_SetSwapQuickStateButtons(bool swapped) {
+  g_swap_quick_state_buttons = swapped;
 }
 
 void Platform3DS_SetCurrentFps(int fps) {
