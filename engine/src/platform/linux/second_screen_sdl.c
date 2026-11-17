@@ -225,6 +225,7 @@ static bool ss_needs_rebuild;
 
 // touch rects recomputed every draw, used by the tap handler
 static RectFS map_area_r, tab_items_r, tab_gear_r, tab_map_r, tab_settings_r, y_ring_r;
+static RectFS quick_save_r, quick_load_r;
 static bool update_mode, update_confirm, update_show_notes;
 static unsigned update_page;
 static RectFS update_release_r, update_prev_r, update_next_r;
@@ -2022,39 +2023,119 @@ static void draw_cinema_settings_overlay(void) {
   }
 }
 
-static void draw_tab_button(RectFS r, const char *label, bool active) {
+static void draw_tab_button(RectFS r, const char *label, bool active,
+                            float text_scale) {
   uint32_t bg = active ? COL(40, 34, 12) : COL_BOX;
   fill_round(r.x, r.y, r.w, r.h, 10 * u, bg);
   fill_round(r.x + 3 * u, r.y + 3 * u, r.w - 6 * u, r.h - 6 * u, 8 * u,
              active ? COL_GOLD : COL_BOX_BORDER2);
   fill_round(r.x + 7 * u, r.y + 7 * u, r.w - 14 * u, r.h - 14 * u, 6 * u, bg);
-  float s = 3 * u;
   if (label)
-    draw_text(label, r.x + r.w / 2 - text_width(label, s) / 2, UiFontCenteredY(label, ui_text_scale(s), lroundf(r.y), lroundf(r.h)), s);
+    draw_text(label, r.x + r.w / 2 - text_width(label, text_scale) / 2,
+              UiFontCenteredY(label, ui_text_scale(text_scale),
+                              lroundf(r.y), lroundf(r.h)), text_scale);
 }
 
-static void draw_tab_bar(float tab_h) {
+static void draw_quick_state_button(RectFS r, const char *letter,
+                                    const char *word) {
+  fill_round(r.x, r.y, r.w, r.h, 8 * u, COL_BOX_BORDER2);
+  fill_round(r.x + 3 * u, r.y + 3 * u, r.w - 6 * u, r.h - 6 * u,
+             6 * u, COL_BOX);
+  float letter_scale = 2.4f * u;
+  float word_scale = 1.0f * u;
+  float gap = 3 * u;
+  float letter_w = text_width(letter, letter_scale);
+  float word_w = text_width(word, word_scale);
+  float total_w = letter_w + gap + word_w;
+  if (total_w <= r.w - 6 * u) {
+    float x = r.x + (r.w - total_w) * 0.5f;
+    draw_text(letter, x,
+              UiFontCenteredY(letter, ui_text_scale(letter_scale),
+                              lroundf(r.y), lroundf(r.h)), letter_scale);
+    draw_text(word, x + letter_w + gap,
+              UiFontCenteredY(word, ui_text_scale(word_scale),
+                              lroundf(r.y), lroundf(r.h)), word_scale);
+  } else {
+    letter_scale = 2.5f * u;
+    word_scale = 1.25f * u;
+    draw_text(letter, r.x + r.w / 2 - text_width(letter, letter_scale) / 2,
+              r.y + 8 * u, letter_scale);
+    draw_text(word, r.x + r.w / 2 - text_width(word, word_scale) / 2,
+              r.y + 43 * u, word_scale);
+  }
+}
+
+static void draw_quick_state_flash(float tab_h) {
+  if (SDL_GetTicks() >= state_flash_until)
+    return;
+  const char *label = UI_Text(state_flash);
+  float width = fminf(W - 24 * u, 196 * u);
+  float height = 32 * u;
+  float x = (W - width) * 0.5f;
+  float y = H - tab_h - 50 * u;
+  fill_round(x, y, width, height, 6 * u, COL_BOX);
+  float scale = 2 * u;
+  draw_text(label, W / 2 - text_width(label, scale) / 2,
+            UiFontCenteredY(label, ui_text_scale(scale),
+                            lroundf(y), lroundf(height)), scale);
+}
+
+static void draw_tab_bar(float tab_h, bool quick_state_buttons) {
   float y = H - tab_h + 4 * u;
   float bh = tab_h - 16 * u;
-  float sq = bh;   // square settings button on the right
-  tab_settings_r = (RectFS){W - 8 * u - sq, y, sq, bh};
+  quick_save_r = quick_load_r = (RectFS){0, 0, 0, 0};
+  float sq = bh;
+  float x0, xr, tgap, label_scale;
+  if (quick_state_buttons) {
+    float corner_w = 62 * u;
+    float corner_gap = 4 * u;
+    quick_save_r = (RectFS){4 * u, y, corner_w, bh};
+    quick_load_r = (RectFS){W - 4 * u - corner_w, y, corner_w, bh};
+    draw_quick_state_button(quick_save_r, "S", "SAVE");
+    draw_quick_state_button(quick_load_r, "L", "LOAD");
+    sq = fminf(bh, 52 * u);
+    x0 = quick_save_r.x + quick_save_r.w + corner_gap;
+    xr = quick_load_r.x - corner_gap;
+    tgap = 4 * u;
+    label_scale = 1.5f * u;
+  } else {
+    x0 = 8 * u;
+    xr = W - 8 * u;
+    tgap = 8 * u;
+    label_scale = 3 * u;
+  }
+  tab_settings_r = (RectFS){xr - sq, y, sq, bh};
   // Natural label widths: GEAR | MAP | ITEMS, with a separate settings square.
-  float x0 = 8 * u, xr = tab_settings_r.x - 8 * u, tgap = 8 * u;
   const char *names[] = {UI_Text(kUi_Gear), UI_Text(kUi_Map), UI_Text(kUi_Items)};
   float widths[3], natural=0;
-  for (int i=0;i<3;i++) { widths[i]=text_width(names[i],3*u)+16; natural+=widths[i]; }
-  float spare=fmaxf(0,floorf(xr-x0-2*tgap)-natural);
+  float padding = quick_state_buttons ? 4 * u : 16 * u;
+  for (int i=0;i<3;i++) {
+    widths[i]=text_width(names[i],label_scale)+padding;
+    natural+=widths[i];
+  }
+  float tabs_right = tab_settings_r.x - (quick_state_buttons ? 4 * u : 8 * u);
+  float available = floorf(tabs_right - x0 - 2 * tgap);
+  while (quick_state_buttons && natural > available && label_scale > 1.0f * u) {
+    label_scale -= 0.1f * u;
+    natural = 0;
+    for (int i=0;i<3;i++) {
+      widths[i]=text_width(names[i],label_scale)+padding;
+      natural+=widths[i];
+    }
+  }
+  float spare=fmaxf(0,available-natural);
   int edge=(int)lroundf(x0);
   RectFS *tabs[]={&tab_gear_r,&tab_map_r,&tab_items_r};
   for (int i=0;i<3;i++) {
-    int end=i==2 ? (int)floorf(xr) : edge+(int)floorf(widths[i]+spare/3);
+    int end=i==2 ? (int)floorf(tabs_right) :
+      edge+(int)floorf(widths[i]+spare/3);
     *tabs[i]=(RectFS){edge,y,end-edge,bh};
-    edge=end+(int)lroundf(tgap);
+    if (i < 2) edge=end+(int)lroundf(tgap);
   }
-  draw_tab_button(tab_gear_r, UI_Text(kUi_Gear), tab == TAB_GEAR);
-  draw_tab_button(tab_map_r, UI_Text(kUi_Map), tab == TAB_MAP);
-  draw_tab_button(tab_items_r, UI_Text(kUi_Items), tab == TAB_ITEMS);
-  draw_tab_button(tab_settings_r, NULL, tab == TAB_SETTINGS);
+  draw_tab_button(tab_gear_r, UI_Text(kUi_Gear), tab == TAB_GEAR, label_scale);
+  draw_tab_button(tab_map_r, UI_Text(kUi_Map), tab == TAB_MAP, label_scale);
+  draw_tab_button(tab_items_r, UI_Text(kUi_Items), tab == TAB_ITEMS, label_scale);
+  draw_tab_button(tab_settings_r, NULL, tab == TAB_SETTINGS, label_scale);
   draw_cog(tab_settings_r.x + tab_settings_r.w / 2, tab_settings_r.y + tab_settings_r.h / 2,
            bh * 0.28f);
 }
@@ -2518,7 +2599,9 @@ static bool bottom_needs_periodic_redraw(void) {
     return false;
   if (mode_for_module(SS_GetModule() & 0xff) != MODE_GAME)
     return tab == TAB_SETTINGS; // Keep settings timers alive; the Old cinema card is static.
-  return tab == TAB_MAP || tab == TAB_ITEMS;
+  return tab == TAB_MAP || tab == TAB_ITEMS ||
+    (tab == TAB_GEAR && state_flash_until != 0 &&
+     (int32_t)(state_flash_until + 250 - SDL_GetTicks()) > 0);
 }
 
 static void draw_bottom_sidebar_patch(void) {
@@ -2627,6 +2710,42 @@ static void scenario_tap(float x, float y) {
   }
 }
 
+static bool quick_state_available(void) {
+  return ss_enabled && art_ready && tab != TAB_SETTINGS &&
+         mode_for_module(SS_GetModule() & 0xff) == MODE_GAME;
+}
+
+static void quick_state_action(bool save) {
+  if (save) {
+    SS_SaveLoadState(true);
+    state_flash = kUi_Done;
+    state_flash_until = SDL_GetTicks() + 1200;
+  } else if (SS_HasSaveState()) {
+    SS_SaveLoadState(false);
+    state_flash = kUi_StateLoaded;
+    state_flash_until = SDL_GetTicks() + 1200;
+  } else {
+    state_flash = kUi_NoState;
+    state_flash_until = SDL_GetTicks() + 1500;
+  }
+}
+
+void SecondScreenSDL_QuickSaveLoad(bool save) {
+  if (!quick_state_available())
+    return;
+  quick_state_action(save);
+  request_bottom_redraw(kBottomRedrawFull);
+#ifdef __3DS__
+  if (!ss_is_new_3ds) {
+    ss_touch_request_ticks = svcGetSystemTick();
+    ss_touch_redraw_pending = true;
+    ss_worker_interactive = true;
+  }
+  prioritize_bottom_touch();
+  if (ss_is_new_3ds) ss_touch_sync_redraw = true;
+#endif
+}
+
 static void apply_tap(float x, float y) {
   int module = SS_GetModule() & 0xFF;
   int ui_mode = mode_for_module(module);
@@ -2713,6 +2832,17 @@ static void apply_tap(float x, float y) {
     goto settings_tap;
   }
   if (!art_ready) return;
+
+  if (tab != TAB_SETTINGS && quick_save_r.w > 0 &&
+      in_rect(&quick_save_r, x, y)) {
+    quick_state_action(true);
+    return;
+  }
+  if (tab != TAB_SETTINGS && quick_load_r.w > 0 &&
+      in_rect(&quick_load_r, x, y)) {
+    quick_state_action(false);
+    return;
+  }
 
   int requested_tab = tab_at_position(x, y);
   if (requested_tab >= 0) {
@@ -3303,7 +3433,10 @@ static void draw_second_screen(int logic_frames) {
 
   if (!full_width)
     draw_sidebar(W - side_w + 4 * u, 10 * u, side_w - 14 * u, H - tab_h - 14 * u, dungeon_mode);
-  if(!qol_mode)draw_tab_bar(tab_h);
+  bool quick_state_buttons =
+    tab == TAB_MAP || tab == TAB_ITEMS || tab == TAB_GEAR;
+  if (!qol_mode) draw_tab_bar(tab_h, quick_state_buttons);
+  if (quick_state_buttons) draw_quick_state_flash(tab_h);
 
   present_second_screen();
 }
