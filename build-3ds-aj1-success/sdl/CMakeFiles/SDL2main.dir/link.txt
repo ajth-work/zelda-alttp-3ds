@@ -1,0 +1,2 @@
+/opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc-ar qc libSDL2main.a CMakeFiles/SDL2main.dir/src/main/n3ds/SDL_n3ds_main.o
+/opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc-ranlib libSDL2main.a

@@ -1,0 +1,10 @@
+/src/build-3ds-aj1-success/sdl/CMakeFiles/sdl_headers_copy.dir
+/src/build-3ds-aj1-success/sdl/CMakeFiles/SDL2main.dir
+/src/build-3ds-aj1-success/sdl/CMakeFiles/SDL2-static.dir
+/src/build-3ds-aj1-success/sdl/CMakeFiles/uninstall.dir
+/src/build-3ds-aj1-success/sdl/CMakeFiles/edit_cache.dir
+/src/build-3ds-aj1-success/sdl/CMakeFiles/rebuild_cache.dir
+/src/build-3ds-aj1-success/sdl/CMakeFiles/list_install_components.dir
+/src/build-3ds-aj1-success/sdl/CMakeFiles/install.dir
+/src/build-3ds-aj1-success/sdl/CMakeFiles/install/local.dir
+/src/build-3ds-aj1-success/sdl/CMakeFiles/install/strip.dir

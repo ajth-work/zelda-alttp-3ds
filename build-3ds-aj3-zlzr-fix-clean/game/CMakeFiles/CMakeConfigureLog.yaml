@@ -1,0 +1,282 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake/Modules/CMakeDetermineSystem.cmake:200 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      The target system is: Nintendo3DS - 1 - armv6k
+      The host system is: MSYS - 3.6.11-00eb8435.x86_64 - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/share/cmake/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc.exe 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/bin/ld.exe: warning: cannot find entry symbol _start; defaulting to 00008018
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+      
+      The C compiler identification is GNU, found in:
+        /c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/4.0.2/CompilerIdC/a.out
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "/usr/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/CMakeScratch/TryCompile-G9TkUr"
+      binary: "/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/CMakeScratch/TryCompile-G9TkUr"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -mword-relocations -ffunction-sections -D__3DS__"
+      CMAKE_C_FLAGS_DEBUG: "-g -Og -DDEBUG"
+      CMAKE_EXE_LINKER_FLAGS: "-L/opt/devkitpro/libctru/lib -L/opt/devkitpro/portlibs/3ds/lib -specs=3dsx.specs"
+      CMAKE_MODULE_PATH: "/opt/devkitpro/cmake;/opt/devkitpro/cmake"
+      CMAKE_USER_MAKE_RULES_OVERRIDE: "/opt/devkitpro/cmake/dkp-rule-overrides.cmake"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/CMakeScratch/TryCompile-G9TkUr'
+        
+        Run Build Command(s): /usr/bin/cmake.exe -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_9d977/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_9d977.dir/build.make CMakeFiles/cmTC_9d977.dir/build
+        gmake[1]: Entering directory '/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/CMakeScratch/TryCompile-G9TkUr'
+        Building C object CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o
+        /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc.exe  -isystem /opt/devkitpro/libctru/include -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -mword-relocations -ffunction-sections -D__3DS__  -g -O2 -DNDEBUG   -v -o CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o -c /usr/share/cmake/Modules/CMakeCCompilerABI.c
+        Using built-in specs.
+        COLLECT_GCC=C:\\devkitPro\\devkitARM\\bin\\arm-none-eabi-gcc.exe
+        Target: arm-none-eabi
+        Configured with: /home/davem/projects/devkitpro/tool-packages/devkitarm/gcc/src/gcc-16.1.0/configure --host=x86_64-w64-mingw32 --build=x86_64-linux-gnu --target=arm-none-eabi --prefix=/opt/devkitpro/devkitARM --enable-languages=c,c++,objc,lto --with-march=armv4t --enable-cxx-flags=-ffunction-sections --disable-libstdcxx-verbose --enable-multilib --enable-interwork --enable-threads --disable-win32-registry --disable-nls --disable-debug --disable-libmudflap --disable-libssp --disable-libgomp --disable-libstdcxx-pch --enable-libstdcxx-time=yes --enable-libstdcxx-filesystem-ts --with-newlib --with-native-system-header-dir=/include --with-sysroot=/opt/devkitpro/devkitARM/arm-none-eabi --with-system-zlib --disable-tm-clone-registry --disable-__cxa_atexit --with-pkgversion=devkitARM --disable-nls --enable-lto --enable-plugins --with-bugurl=https://devkitpro.org --with-pkgversion=devkitARM --with-gmp=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-mpfr=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-mpc=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-isl=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-zstd=/opt/devkitpro/crosstools/x86_64-w64-mingw32
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 16.1.0 (devkitARM) 
+        COLLECT_GCC_OPTIONS='-isystem' 'C:/devkitPro/libctru/include'  '-mtune=mpcore' '-mfloat-abi=hard' '-mtp=soft' '-mword-relocations' '-ffunction-sections' '-D' '__3DS__' '-g' '-O2' '-D' 'NDEBUG' '-v' '-o' 'CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o' '-c' '-marm' '-mlibarch=armv6k' '-march=armv6k' '-dumpdir' 'CMakeFiles/cmTC_9d977.dir/'
+         C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/cc1.exe -quiet -v -imultilib armv6k/fpu -iprefix C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/ -isysroot C:/devkitPro/devkitARM/bin/../arm-none-eabi -D__USES_INITFINI__ -D __3DS__ -D NDEBUG -isystem C:/devkitPro/libctru/include C:/devkitPro/msys2/usr/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_9d977.dir/ -dumpbase CMakeCCompilerABI.c -dumpbase-ext .c -mtune=mpcore -mfloat-abi=hard -mtp=soft -mword-relocations -marm -mlibarch=armv6k -march=armv6k -g -O2 -version -ffunction-sections -o C:\\Users\\Andrew-John\\zelda-alttp-3ds\\build-3ds-aj3-zlzr-fix-clean\\tmp\\cccFTFMd.s
+        GNU C23 (devkitARM) version 16.1.0 (arm-none-eabi)
+        	compiled by GNU C version 13.3.0, GMP version 6.2.1, MPFR version 4.1.0, MPC version 1.2.1, isl version isl-0.18-GMP
+        
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring duplicate directory "C:/devkitPro/devkitARM/lib/gcc/../../lib/gcc/arm-none-eabi/16.1.0/include"
+        ignoring nonexistent directory "C:/devkitPro/devkitARM/bin/../arm-none-eabi/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/../../../../include"
+        ignoring duplicate directory "C:/devkitPro/devkitARM/lib/gcc/../../lib/gcc/arm-none-eabi/16.1.0/include-fixed"
+        ignoring duplicate directory "C:/devkitPro/devkitARM/lib/gcc/../../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/include"
+        ignoring duplicate directory "C:/devkitPro/devkitARM/bin/../arm-none-eabi/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         C:/devkitPro/libctru/include
+         C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/include
+         C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/include-fixed
+         C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/include
+        End of search list.
+        Compiler executable checksum: 23e70ddc713db18d3b43dc17507df799
+        COLLECT_GCC_OPTIONS='-isystem' 'C:/devkitPro/libctru/include'  '-mtune=mpcore' '-mfloat-abi=hard' '-mtp=soft' '-mword-relocations' '-ffunction-sections' '-D' '__3DS__' '-g' '-O2' '-D' 'NDEBUG' '-v' '-o' 'CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o' '-c' '-marm' '-mlibarch=armv6k' '-march=armv6k' '-dumpdir' 'CMakeFiles/cmTC_9d977.dir/'
+         C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/bin/as.exe -march=armv6k -mfloat-abi=hard -meabi=5 -o CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o C:\\Users\\Andrew-John\\zelda-alttp-3ds\\build-3ds-aj3-zlzr-fix-clean\\tmp\\cccFTFMd.s
+        COMPILER_PATH=C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/;C:/devkitPro/devkitARM/bin/../libexec/gcc/;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/bin/
+        LIBRARY_PATH=C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu/;C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/armv6k/fpu/;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/;C:/devkitPro/devkitARM/bin/../lib/gcc/;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/;C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/
+        COLLECT_GCC_OPTIONS='-isystem' 'C:/devkitPro/libctru/include'  '-mtune=mpcore' '-mfloat-abi=hard' '-mtp=soft' '-mword-relocations' '-ffunction-sections' '-D' '__3DS__' '-g' '-O2' '-D' 'NDEBUG' '-v' '-o' 'CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o' '-c' '-marm' '-mlibarch=armv6k' '-march=armv6k' '-dumpdir' 'CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.'
+        Linking C executable cmTC_9d977.elf
+        /usr/bin/cmake.exe -E cmake_link_script CMakeFiles/cmTC_9d977.dir/link.txt --verbose=1
+        Using built-in specs.
+        Reading specs from C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/3dsx.specs
+        Reading specs from C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/sync-dmb.specs
+        rename spec link to sync_sync_link
+        COLLECT_GCC=C:\\devkitPro\\devkitARM\\bin\\arm-none-eabi-gcc.exe
+        COLLECT_LTO_WRAPPER=C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/lto-wrapper.exe
+        Target: arm-none-eabi
+        Configured with: /home/davem/projects/devkitpro/tool-packages/devkitarm/gcc/src/gcc-16.1.0/configure --host=x86_64-w64-mingw32 --build=x86_64-linux-gnu --target=arm-none-eabi --prefix=/opt/devkitpro/devkitARM --enable-languages=c,c++,objc,lto --with-march=armv4t --enable-cxx-flags=-ffunction-sections --disable-libstdcxx-verbose --enable-multilib --enable-interwork --enable-threads --disable-win32-registry --disable-nls --disable-debug --disable-libmudflap --disable-libssp --disable-libgomp --disable-libstdcxx-pch --enable-libstdcxx-time=yes --enable-libstdcxx-filesystem-ts --with-newlib --with-native-system-header-dir=/include --with-sysroot=/opt/devkitpro/devkitARM/arm-none-eabi --with-system-zlib --disable-tm-clone-registry --disable-__cxa_atexit --with-pkgversion=devkitARM --disable-nls --enable-lto --enable-plugins --with-bugurl=https://devkitpro.org --with-pkgversion=devkitARM --with-gmp=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-mpfr=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-mpc=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-isl=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-zstd=/opt/devkitpro/crosstools/x86_64-w64-mingw32
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 16.1.0 (devkitARM) 
+        COMPILER_PATH=C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/;C:/devkitPro/devkitARM/bin/../libexec/gcc/;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/bin/
+        LIBRARY_PATH=C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu/;C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/armv6k/fpu/;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/;C:/devkitPro/devkitARM/bin/../lib/gcc/;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/;C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/
+        COLLECT_GCC_OPTIONS= '-mtune=mpcore' '-mfloat-abi=hard' '-mtp=soft' '-mword-relocations' '-ffunction-sections' '-D' '__3DS__' '-g' '-O2' '-D' 'NDEBUG' '-LC:/devkitPro/libctru/lib' '-LC:/devkitPro/portlibs/3ds/lib' '-specs=3dsx.specs' '-v' '-o' 'cmTC_9d977.elf' '-marm' '-mlibarch=armv6k' '-march=armv6k' '-dumpdir' 'cmTC_9d977.elf.'
+         C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/collect2.exe -plugin C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/liblto_plugin.dll -plugin-opt=C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/lto-wrapper.exe -plugin-opt=-fresolution=C:\\Users\\Andrew-John\\zelda-alttp-3ds\\build-3ds-aj3-zlzr-fix-clean\\tmp\\cc2FGU6r.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lg -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lsysbase --defsym=__sync_synchronize=__sync_synchronize_dmb --sysroot=C:/devkitPro/devkitARM/bin/../arm-none-eabi -X -T C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/3dsx.ld -d --emit-relocs --use-blx --gc-sections -o cmTC_9d977.elf C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu/3dsx_crt0.o C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crti.o C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtbegin.o -LC:/devkitPro/libctru/lib -LC:/devkitPro/portlibs/3ds/lib -LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu -LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu -LC:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/armv6k/fpu -LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0 -LC:/devkitPro/devkitARM/bin/../lib/gcc -LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib -LC:/devkitPro/devkitARM/bin/../arm-none-eabi/lib CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o -lctru -lm --start-group -lgcc -lg -lc -lsysbase --end-group C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtend.o C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtn.o
+        COLLECT_GCC_OPTIONS= '-mtune=mpcore' '-mfloat-abi=hard' '-mtp=soft' '-mword-relocations' '-ffunction-sections' '-D' '__3DS__' '-g' '-O2' '-D' 'NDEBUG' '-LC:/devkitPro/libctru/lib' '-LC:/devkitPro/portlibs/3ds/lib' '-specs=3dsx.specs' '-v' '-o' 'cmTC_9d977.elf' '-marm' '-mlibarch=armv6k' '-march=armv6k' '-dumpdir' 'cmTC_9d977.elf.'
+        /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc.exe -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -mword-relocations -ffunction-sections -D__3DS__  -g -O2 -DNDEBUG -L/opt/devkitpro/libctru/lib -L/opt/devkitpro/portlibs/3ds/lib -specs=3dsx.specs -v CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o -o cmTC_9d977.elf  -lctru -lm
+        gmake[1]: Leaving directory '/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/CMakeScratch/TryCompile-G9TkUr'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:191 (message)"
+      - "/usr/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [C:/devkitPro/libctru/include]
+          add: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/include]
+          add: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/include-fixed]
+          add: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/include]
+        end of search list found
+        skipping relative include dir [C:/devkitPro/libctru/include]
+        skipping relative include dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/include]
+        skipping relative include dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/include-fixed]
+        skipping relative include dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/include]
+        implicit include dirs: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "/usr/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
+        ignore line: [Change Dir: '/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/CMakeScratch/TryCompile-G9TkUr']
+        ignore line: []
+        ignore line: [Run Build Command(s): /usr/bin/cmake.exe -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_9d977/fast]
+        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_9d977.dir/build.make CMakeFiles/cmTC_9d977.dir/build]
+        ignore line: [gmake[1]: Entering directory '/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/CMakeScratch/TryCompile-G9TkUr']
+        ignore line: [Building C object CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o]
+        ignore line: [/opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc.exe  -isystem /opt/devkitpro/libctru/include -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -mword-relocations -ffunction-sections -D__3DS__  -g -O2 -DNDEBUG   -v -o CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o -c /usr/share/cmake/Modules/CMakeCCompilerABI.c]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=C:\\devkitPro\\devkitARM\\bin\\arm-none-eabi-gcc.exe]
+        ignore line: [Target: arm-none-eabi]
+        ignore line: [Configured with: /home/davem/projects/devkitpro/tool-packages/devkitarm/gcc/src/gcc-16.1.0/configure --host=x86_64-w64-mingw32 --build=x86_64-linux-gnu --target=arm-none-eabi --prefix=/opt/devkitpro/devkitARM --enable-languages=c c++ objc lto --with-march=armv4t --enable-cxx-flags=-ffunction-sections --disable-libstdcxx-verbose --enable-multilib --enable-interwork --enable-threads --disable-win32-registry --disable-nls --disable-debug --disable-libmudflap --disable-libssp --disable-libgomp --disable-libstdcxx-pch --enable-libstdcxx-time=yes --enable-libstdcxx-filesystem-ts --with-newlib --with-native-system-header-dir=/include --with-sysroot=/opt/devkitpro/devkitARM/arm-none-eabi --with-system-zlib --disable-tm-clone-registry --disable-__cxa_atexit --with-pkgversion=devkitARM --disable-nls --enable-lto --enable-plugins --with-bugurl=https://devkitpro.org --with-pkgversion=devkitARM --with-gmp=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-mpfr=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-mpc=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-isl=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-zstd=/opt/devkitpro/crosstools/x86_64-w64-mingw32]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 16.1.0 (devkitARM) ]
+        ignore line: [COLLECT_GCC_OPTIONS='-isystem' 'C:/devkitPro/libctru/include'  '-mtune=mpcore' '-mfloat-abi=hard' '-mtp=soft' '-mword-relocations' '-ffunction-sections' '-D' '__3DS__' '-g' '-O2' '-D' 'NDEBUG' '-v' '-o' 'CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o' '-c' '-marm' '-mlibarch=armv6k' '-march=armv6k' '-dumpdir' 'CMakeFiles/cmTC_9d977.dir/']
+        ignore line: [ C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/cc1.exe -quiet -v -imultilib armv6k/fpu -iprefix C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/ -isysroot C:/devkitPro/devkitARM/bin/../arm-none-eabi -D__USES_INITFINI__ -D __3DS__ -D NDEBUG -isystem C:/devkitPro/libctru/include C:/devkitPro/msys2/usr/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_9d977.dir/ -dumpbase CMakeCCompilerABI.c -dumpbase-ext .c -mtune=mpcore -mfloat-abi=hard -mtp=soft -mword-relocations -marm -mlibarch=armv6k -march=armv6k -g -O2 -version -ffunction-sections -o C:\\Users\\Andrew-John\\zelda-alttp-3ds\\build-3ds-aj3-zlzr-fix-clean\\tmp\\cccFTFMd.s]
+        ignore line: [GNU C23 (devkitARM) version 16.1.0 (arm-none-eabi)]
+        ignore line: [	compiled by GNU C version 13.3.0  GMP version 6.2.1  MPFR version 4.1.0  MPC version 1.2.1  isl version isl-0.18-GMP]
+        ignore line: []
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring duplicate directory "C:/devkitPro/devkitARM/lib/gcc/../../lib/gcc/arm-none-eabi/16.1.0/include"]
+        ignore line: [ignoring nonexistent directory "C:/devkitPro/devkitARM/bin/../arm-none-eabi/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/../../../../include"]
+        ignore line: [ignoring duplicate directory "C:/devkitPro/devkitARM/lib/gcc/../../lib/gcc/arm-none-eabi/16.1.0/include-fixed"]
+        ignore line: [ignoring duplicate directory "C:/devkitPro/devkitARM/lib/gcc/../../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/include"]
+        ignore line: [ignoring duplicate directory "C:/devkitPro/devkitARM/bin/../arm-none-eabi/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ C:/devkitPro/libctru/include]
+        ignore line: [ C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/include]
+        ignore line: [ C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/include-fixed]
+        ignore line: [ C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/include]
+        ignore line: [End of search list.]
+        ignore line: [Compiler executable checksum: 23e70ddc713db18d3b43dc17507df799]
+        ignore line: [COLLECT_GCC_OPTIONS='-isystem' 'C:/devkitPro/libctru/include'  '-mtune=mpcore' '-mfloat-abi=hard' '-mtp=soft' '-mword-relocations' '-ffunction-sections' '-D' '__3DS__' '-g' '-O2' '-D' 'NDEBUG' '-v' '-o' 'CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o' '-c' '-marm' '-mlibarch=armv6k' '-march=armv6k' '-dumpdir' 'CMakeFiles/cmTC_9d977.dir/']
+        ignore line: [ C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/bin/as.exe -march=armv6k -mfloat-abi=hard -meabi=5 -o CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o C:\\Users\\Andrew-John\\zelda-alttp-3ds\\build-3ds-aj3-zlzr-fix-clean\\tmp\\cccFTFMd.s]
+        ignore line: [COMPILER_PATH=C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../libexec/gcc/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/bin/]
+        ignore line: [LIBRARY_PATH=C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/armv6k/fpu/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../lib/gcc/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-isystem' 'C:/devkitPro/libctru/include'  '-mtune=mpcore' '-mfloat-abi=hard' '-mtp=soft' '-mword-relocations' '-ffunction-sections' '-D' '__3DS__' '-g' '-O2' '-D' 'NDEBUG' '-v' '-o' 'CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o' '-c' '-marm' '-mlibarch=armv6k' '-march=armv6k' '-dumpdir' 'CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.']
+        ignore line: [Linking C executable cmTC_9d977.elf]
+        ignore line: [/usr/bin/cmake.exe -E cmake_link_script CMakeFiles/cmTC_9d977.dir/link.txt --verbose=1]
+        ignore line: [Using built-in specs.]
+        ignore line: [Reading specs from C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/3dsx.specs]
+        ignore line: [Reading specs from C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/sync-dmb.specs]
+        ignore line: [rename spec link to sync_sync_link]
+        ignore line: [COLLECT_GCC=C:\\devkitPro\\devkitARM\\bin\\arm-none-eabi-gcc.exe]
+        ignore line: [COLLECT_LTO_WRAPPER=C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/lto-wrapper.exe]
+        ignore line: [Target: arm-none-eabi]
+        ignore line: [Configured with: /home/davem/projects/devkitpro/tool-packages/devkitarm/gcc/src/gcc-16.1.0/configure --host=x86_64-w64-mingw32 --build=x86_64-linux-gnu --target=arm-none-eabi --prefix=/opt/devkitpro/devkitARM --enable-languages=c c++ objc lto --with-march=armv4t --enable-cxx-flags=-ffunction-sections --disable-libstdcxx-verbose --enable-multilib --enable-interwork --enable-threads --disable-win32-registry --disable-nls --disable-debug --disable-libmudflap --disable-libssp --disable-libgomp --disable-libstdcxx-pch --enable-libstdcxx-time=yes --enable-libstdcxx-filesystem-ts --with-newlib --with-native-system-header-dir=/include --with-sysroot=/opt/devkitpro/devkitARM/arm-none-eabi --with-system-zlib --disable-tm-clone-registry --disable-__cxa_atexit --with-pkgversion=devkitARM --disable-nls --enable-lto --enable-plugins --with-bugurl=https://devkitpro.org --with-pkgversion=devkitARM --with-gmp=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-mpfr=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-mpc=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-isl=/opt/devkitpro/crosstools/x86_64-w64-mingw32 --with-zstd=/opt/devkitpro/crosstools/x86_64-w64-mingw32]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 16.1.0 (devkitARM) ]
+        ignore line: [COMPILER_PATH=C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../libexec/gcc/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/bin/]
+        ignore line: [LIBRARY_PATH=C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/armv6k/fpu/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../lib/gcc/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/]
+        ignore line: [C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS= '-mtune=mpcore' '-mfloat-abi=hard' '-mtp=soft' '-mword-relocations' '-ffunction-sections' '-D' '__3DS__' '-g' '-O2' '-D' 'NDEBUG' '-LC:/devkitPro/libctru/lib' '-LC:/devkitPro/portlibs/3ds/lib' '-specs=3dsx.specs' '-v' '-o' 'cmTC_9d977.elf' '-marm' '-mlibarch=armv6k' '-march=armv6k' '-dumpdir' 'cmTC_9d977.elf.']
+        link line: [ C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/collect2.exe -plugin C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/liblto_plugin.dll -plugin-opt=C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/lto-wrapper.exe -plugin-opt=-fresolution=C:\\Users\\Andrew-John\\zelda-alttp-3ds\\build-3ds-aj3-zlzr-fix-clean\\tmp\\cc2FGU6r.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lg -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lsysbase --defsym=__sync_synchronize=__sync_synchronize_dmb --sysroot=C:/devkitPro/devkitARM/bin/../arm-none-eabi -X -T C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/3dsx.ld -d --emit-relocs --use-blx --gc-sections -o cmTC_9d977.elf C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu/3dsx_crt0.o C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crti.o C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtbegin.o -LC:/devkitPro/libctru/lib -LC:/devkitPro/portlibs/3ds/lib -LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu -LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu -LC:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/armv6k/fpu -LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0 -LC:/devkitPro/devkitARM/bin/../lib/gcc -LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib -LC:/devkitPro/devkitARM/bin/../arm-none-eabi/lib CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o -lctru -lm --start-group -lgcc -lg -lc -lsysbase --end-group C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtend.o C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtn.o]
+          arg [C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/collect2.exe] ==> ignore
+          arg [-plugin] ==> ignore
+          arg [C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/liblto_plugin.dll] ==> ignore
+          arg [-plugin-opt=C:/devkitPro/devkitARM/bin/../libexec/gcc/arm-none-eabi/16.1.0/lto-wrapper.exe] ==> ignore
+          arg [-plugin-opt=-fresolution=C:UsersAndrew-Johnzelda-alttp-3dsbuild-3ds-aj3-zlzr-fix-cleantmpcc2FGU6r.res] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lg] ==> ignore
+          arg [-plugin-opt=-pass-through=-lc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lsysbase] ==> ignore
+          arg [--defsym=__sync_synchronize=__sync_synchronize_dmb] ==> ignore
+          arg [--sysroot=C:/devkitPro/devkitARM/bin/../arm-none-eabi] ==> ignore
+          arg [-X] ==> ignore
+          arg [-T] ==> ignore
+          arg [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/3dsx.ld] ==> ignore
+          arg [-d] ==> ignore
+          arg [--emit-relocs] ==> ignore
+          arg [--use-blx] ==> ignore
+          arg [--gc-sections] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_9d977.elf] ==> ignore
+          arg [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu/3dsx_crt0.o] ==> obj [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu/3dsx_crt0.o]
+          arg [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crti.o] ==> obj [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crti.o]
+          arg [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtbegin.o] ==> obj [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtbegin.o]
+          arg [-LC:/devkitPro/libctru/lib] ==> dir [C:/devkitPro/libctru/lib]
+          arg [-LC:/devkitPro/portlibs/3ds/lib] ==> dir [C:/devkitPro/portlibs/3ds/lib]
+          arg [-LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu] ==> dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu]
+          arg [-LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu] ==> dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu]
+          arg [-LC:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/armv6k/fpu] ==> dir [C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/armv6k/fpu]
+          arg [-LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0] ==> dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0]
+          arg [-LC:/devkitPro/devkitARM/bin/../lib/gcc] ==> dir [C:/devkitPro/devkitARM/bin/../lib/gcc]
+          arg [-LC:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib] ==> dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib]
+          arg [-LC:/devkitPro/devkitARM/bin/../arm-none-eabi/lib] ==> dir [C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib]
+          arg [CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o] ==> ignore
+          arg [-lctru] ==> lib [ctru]
+          arg [-lm] ==> lib [m]
+          arg [--start-group] ==> ignore
+          arg [-lgcc] ==> lib [gcc]
+          arg [-lg] ==> lib [g]
+          arg [-lc] ==> lib [c]
+          arg [-lsysbase] ==> lib [sysbase]
+          arg [--end-group] ==> ignore
+          arg [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtend.o] ==> obj [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtend.o]
+          arg [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtn.o] ==> obj [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtn.o]
+        ignore line: [COLLECT_GCC_OPTIONS= '-mtune=mpcore' '-mfloat-abi=hard' '-mtp=soft' '-mword-relocations' '-ffunction-sections' '-D' '__3DS__' '-g' '-O2' '-D' 'NDEBUG' '-LC:/devkitPro/libctru/lib' '-LC:/devkitPro/portlibs/3ds/lib' '-specs=3dsx.specs' '-v' '-o' 'cmTC_9d977.elf' '-marm' '-mlibarch=armv6k' '-march=armv6k' '-dumpdir' 'cmTC_9d977.elf.']
+        ignore line: [/opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc.exe -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -mword-relocations -ffunction-sections -D__3DS__  -g -O2 -DNDEBUG -L/opt/devkitpro/libctru/lib -L/opt/devkitpro/portlibs/3ds/lib -specs=3dsx.specs -v CMakeFiles/cmTC_9d977.dir/CMakeCCompilerABI.o -o cmTC_9d977.elf  -lctru -lm]
+        ignore line: [gmake[1]: Leaving directory '/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/CMakeScratch/TryCompile-G9TkUr']
+        ignore line: []
+        ignore line: []
+        collapse library dir [C:/devkitPro/libctru/lib] ==> [C:/devkitPro/libctru/lib]
+        collapse library dir [C:/devkitPro/portlibs/3ds/lib] ==> [C:/devkitPro/portlibs/3ds/lib]
+        collapse library dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu] ==> [C:/devkitPro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu]
+        collapse library dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu] ==> [C:/devkitPro/devkitARM/arm-none-eabi/lib/armv6k/fpu]
+        collapse library dir [C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib/armv6k/fpu] ==> [C:/devkitPro/devkitARM/arm-none-eabi/lib/armv6k/fpu]
+        collapse library dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0] ==> [C:/devkitPro/devkitARM/lib/gcc/arm-none-eabi/16.1.0]
+        collapse library dir [C:/devkitPro/devkitARM/bin/../lib/gcc] ==> [C:/devkitPro/devkitARM/lib/gcc]
+        collapse library dir [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib] ==> [C:/devkitPro/devkitARM/arm-none-eabi/lib]
+        collapse library dir [C:/devkitPro/devkitARM/bin/../arm-none-eabi/lib] ==> [C:/devkitPro/devkitARM/arm-none-eabi/lib]
+        implicit libs: [ctru;m;gcc;g;c;sysbase]
+        implicit objs: [C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/../../../../arm-none-eabi/lib/armv6k/fpu/3dsx_crt0.o;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crti.o;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtbegin.o;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtend.o;C:/devkitPro/devkitARM/bin/../lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu/crtn.o]
+        implicit dirs: [C:/devkitPro/libctru/lib;C:/devkitPro/portlibs/3ds/lib;C:/devkitPro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/armv6k/fpu;C:/devkitPro/devkitARM/arm-none-eabi/lib/armv6k/fpu;C:/devkitPro/devkitARM/lib/gcc/arm-none-eabi/16.1.0;C:/devkitPro/devkitARM/lib/gcc;C:/devkitPro/devkitARM/arm-none-eabi/lib]
+        implicit fwks: []
+      
+      
+...

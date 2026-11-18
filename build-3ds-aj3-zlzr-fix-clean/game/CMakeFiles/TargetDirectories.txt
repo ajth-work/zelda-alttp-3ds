@@ -1,0 +1,6 @@
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/alttp_pica_shader.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/alttp_pica_shader_bin.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/zelda3-3ds.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/zelda3-3ds-3dsx.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/edit_cache.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/game/CMakeFiles/rebuild_cache.dir

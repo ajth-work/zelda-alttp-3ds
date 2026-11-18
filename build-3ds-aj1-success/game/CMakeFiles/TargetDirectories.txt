@@ -1,0 +1,6 @@
+/src/build-3ds-aj1-success/game/CMakeFiles/alttp_pica_shader.dir
+/src/build-3ds-aj1-success/game/CMakeFiles/alttp_pica_shader_bin.dir
+/src/build-3ds-aj1-success/game/CMakeFiles/zelda3-3ds.dir
+/src/build-3ds-aj1-success/game/CMakeFiles/zelda3-3ds-3dsx.dir
+/src/build-3ds-aj1-success/game/CMakeFiles/edit_cache.dir
+/src/build-3ds-aj1-success/game/CMakeFiles/rebuild_cache.dir

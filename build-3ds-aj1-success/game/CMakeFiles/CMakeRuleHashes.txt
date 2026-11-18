@@ -1,0 +1,7 @@
+# Hashes of file build rules.
+a233c7e12d5bb3d5f38a833434544a42 .dkp-generated/alttp_pica_shader_bin/alttp_pica_shader_shbin.S
+63b618f0d8e6032f77c7ccdeb7a3cc86 CMakeFiles/alttp_pica_shader
+63b618f0d8e6032f77c7ccdeb7a3cc86 CMakeFiles/zelda3-3ds-3dsx
+899c5daa400b3aedb9e8b237efec61c9 alttp_pica_shader.shbin
+a642929f532eae2b96f54992051c09b0 zelda3-3ds.3dsx
+14ebcfea6a896c230fbd7752234ce4c2 zelda3-3ds.smdh

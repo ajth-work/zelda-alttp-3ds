@@ -1,0 +1,53 @@
+CMakeFiles/zelda3-3ds.dir/src/engine/src/quality_of_life.o: \
+ /src/engine/src/quality_of_life.c /src/engine/src/quality_of_life.h \
+ /opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/include/stdbool.h \
+ /opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/include/stdint.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/stdint.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/machine/_default_types.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/features.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/_newlib_version.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/_intsup.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/_stdint.h \
+ /src/engine/src/features.h /src/engine/src/types.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/machine/ieeefp.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/_ansi.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/newlib.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/config.h \
+ /opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/include/stddef.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/reent.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/_ansi.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/cdefs.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/_types.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/machine/_types.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/lock.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/machine/stdlib.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/alloca.h \
+ /src/engine/src/file_store.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/errno.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/errno.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h \
+ /opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/include/stdarg.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/stdio.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/stat.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/time.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/machine/time.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/types.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/machine/endian.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/machine/_endian.h \
+ /opt/devkitpro/libctru/include/sys/select.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/select.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/_sigset.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/_timeval.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/timespec.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/_timespec.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/_pthreadtypes.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/sched.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/machine/types.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/_locale.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/signal.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/signal.h \
+ /src/engine/src/ui_strings.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/string.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/strings.h \
+ /opt/devkitpro/devkitARM/arm-none-eabi/include/sys/string.h

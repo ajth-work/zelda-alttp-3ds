@@ -1,0 +1,10 @@
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/sdl/CMakeFiles/sdl_headers_copy.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/sdl/CMakeFiles/SDL2main.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/sdl/CMakeFiles/SDL2-static.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/sdl/CMakeFiles/uninstall.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/sdl/CMakeFiles/edit_cache.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/sdl/CMakeFiles/rebuild_cache.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/sdl/CMakeFiles/list_install_components.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/sdl/CMakeFiles/install.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/sdl/CMakeFiles/install/local.dir
+/c/Users/Andrew-John/zelda-alttp-3ds/build-3ds-aj3-zlzr-fix-clean/sdl/CMakeFiles/install/strip.dir

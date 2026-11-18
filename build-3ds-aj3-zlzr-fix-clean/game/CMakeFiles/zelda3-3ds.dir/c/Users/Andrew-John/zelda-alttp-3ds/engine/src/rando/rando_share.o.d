@@ -1,0 +1,34 @@
+CMakeFiles/zelda3-3ds.dir/c/Users/Andrew-John/zelda-alttp-3ds/engine/src/rando/rando_share.o: \
+ C:/Users/Andrew-John/zelda-alttp-3ds/engine/src/rando/rando_share.c \
+ C:/Users/Andrew-John/zelda-alttp-3ds/engine/src/rando/rando_share.h \
+ C:/Users/Andrew-John/zelda-alttp-3ds/engine/src/types.h \
+ C:/devkitPro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/include/stdint.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/stdint.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/machine/_default_types.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/features.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/_newlib_version.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/_intsup.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/_stdint.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/stdlib.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/machine/ieeefp.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/_ansi.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/newlib.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/config.h \
+ C:/devkitPro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/include/stddef.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/reent.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/_ansi.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/cdefs.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/_types.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/machine/_types.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/lock.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/machine/stdlib.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/alloca.h \
+ C:/devkitPro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/include/stdbool.h \
+ C:/Users/Andrew-John/zelda-alttp-3ds/engine/src/rando/rando_settings.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/string.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/_locale.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/strings.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/string.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/stdio.h \
+ C:/devkitPro/devkitARM/lib/gcc/arm-none-eabi/16.1.0/include/stdarg.h \
+ C:/devkitPro/devkitARM/arm-none-eabi/include/sys/stdio.h
