@@ -109,6 +109,8 @@ typedef struct Config {
   // ON (ALTTPR-style); set FieldItemSprites = 0 in [Graphics] to see vanilla
   // sprites. Inert in non-rando play regardless.
   bool field_item_sprites;       // default true
+  // Optional main-quest journal tab on the second screen.
+  bool second_screen_journal;    // default true
 
   // Enemy-drop check carrier marker. Client-local visual preference for active
   // unchecked enemy-drop checks: placed item icon where the shared tile slot can

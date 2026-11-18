@@ -468,6 +468,8 @@ static bool HandleIniConfig(int section, const char *key, char *value) {
     if (StringEqualsNoCase(key, "Autosave")) {
       g_config.autosave = (bool)strtol(value, (char**)NULL, 10);
       return true;
+    } else if (StringEqualsNoCase(key, "SecondScreenJournal")) {
+      return ParseBool(value, &g_config.second_screen_journal);
     } else if (StringEqualsNoCase(key, "ExtendedAspectRatio")) {
       const char* s;
       int h = 224;
@@ -617,6 +619,7 @@ void ParseConfigFile(const char *filename) {
   memset(joymap_first, 0, sizeof(joymap_first)); has_joypad_controls = false;
   memset(&g_config, 0, sizeof(g_config));
   g_config.field_item_sprites = true;
+  g_config.second_screen_journal = true;
   g_config.enemy_drop_marker = kEnemyDropMarker_Generic;
   g_config.msuvolume = 100;  // default msu volume, 100%
   g_config.wide_edge_mode = 1;  // fixed camera, as on the 3DS

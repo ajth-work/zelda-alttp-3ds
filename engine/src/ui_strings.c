@@ -128,6 +128,7 @@ static const char *const kUiStrings[kUiStringCount][kUiLanguageCount] = {
   [kUi_Gear]            = { "GEAR",          "\xC3\x89QUIP.", "EQUIPO", "EQUIP.", "STATO", "STATUS", "СТАТУС" },
   [kUi_Map]             = { "MAP",           "CARTE", "MAPA", "MAPA", "MAPPA", "KARTE", "КАРТА" },
   [kUi_Items]           = { "ITEMS",         "OBJETS", "OBJETOS", "ITENS", "OGGETTI", "ITEMS", "ВЕЩИ" },
+  [kUi_Journal]         = { "JOURNAL",       "JOURNAL", "DIARIO", "DIARIO", "DIARIO", "TAGEBUCH", "JOURNAL" },
   [kUi_Dungeon]         = { "DUNGEON",       "DONJON", "MAZMORRA", "MASMORRA", "DUNGEON", "VERLIES", "ПОДЗЕМЕЛЬЕ" },
   [kUi_Bottles]         = { "BOTTLES",       "FLACONS", "BOTELLAS", "GARRAFAS", "BOTTIGLIE", "FLASCHEN", "БУТЫЛКИ" },
   [kUi_Pendants]        = { "PENDANTS",      "PENDENTIFS", "COLGANTES", "PINGENTES", "PENDENTI", "AMULETTE", "КУЛОНЫ" },

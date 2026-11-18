@@ -14,7 +14,7 @@ enum UiLanguage {
 
 enum UiString {
   // bottom-screen tabs and panels
-  kUi_Gear, kUi_Map, kUi_Items, kUi_Dungeon,
+  kUi_Gear, kUi_Map, kUi_Items, kUi_Journal, kUi_Dungeon,
   kUi_Bottles, kUi_Pendants, kUi_Crystals,
   // settings
   kUi_Settings, kUi_Screen, kUi_TurboSpeed, kUi_Developer, kUi_Update,
