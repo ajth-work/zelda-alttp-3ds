@@ -5,6 +5,7 @@
 #include "load_gfx.h"
 #include "overworld.h"
 #include "variables.h"
+#include "journal_data.h"
 #include "tagalong.h"
 #include "overlord.h"
 #include "ancilla.h"
@@ -1549,6 +1550,8 @@ int Sprite_ShowMessageOnContact(int k, uint16 msg) {  // 85e1f0
 }
 
 void Sprite_ShowMessageUnconditional(uint16 msg) {  // 85e219
+  if ((unsigned)cur_object_index < 16)
+    JournalData_RecordNpcDialogue(sprite_type[cur_object_index]);
   dialogue_message_index = msg;
   byte_7E0223 = 0;
   messaging_module = 0;
@@ -1575,6 +1578,7 @@ bool Sprite_TutorialGuard_ShowMessageOnContact(int k, uint16 msg) {  // 85fa59
   sprite_flags4[k] = bak4;
   if (!rv)
     return rv;
+  JournalData_RecordNpcDialogue(sprite_type[k]);
   Sprite_NullifyHookshotDrag();
   link_is_running = 0;
   link_speed_setting = 0;
@@ -1811,6 +1815,7 @@ void Sprite_Get16BitCoords(int k) {  // 8684c1
 
 void Sprite_ExecuteSingle(int k) {  // 8684e2
   uint8 st = sprite_state[k];
+  JournalData_ObserveSprite(k, sprite_type[k], st, sprite_health[k]);
   if (st != 0)
     Sprite_TimersAndOam(k);
   kSprite_ExecuteSingle[st](k);
@@ -5365,6 +5370,7 @@ bool Sprite_DoTheDeath(int k) {  // 86f923
   RandoGrantResult grant_result = Rando_TryGrantEnemyCheck(k);
   if (Rando_GrantResultIsBlocked(grant_result))
     return false;
+  JournalData_RecordEnemyDefeat(k, type);
   bool granted_enemy_check = Rando_GrantResultIsTerminal(grant_result);
   // This is how Vitreous knows whether to come out of his slime pool
   if (type == 0xBE)

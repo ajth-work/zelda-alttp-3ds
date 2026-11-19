@@ -60,6 +60,8 @@ enum Platform3DSCStickMode {
 #include "native_menu_button.h"
 #include "setup_pattern.h"
 #include "../../features.h"
+#include "../../journal_data.h"
+#include <time.h>
 #include "generated_ui_sprites.h"
 #if defined(ZELDA3_TEST_NATIVE_MENUS) && !defined(__3DS__)
 #include "updater.h"
@@ -134,6 +136,8 @@ enum {
 };
 
 enum { TAB_MAP, TAB_ITEMS, TAB_GEAR, TAB_JOURNAL, TAB_SETTINGS };
+enum { JOURNAL_QUESTS, JOURNAL_CHARACTERS, JOURNAL_BESTIARY };
+enum { JOURNAL_SORT_CHRONOLOGICAL, JOURNAL_SORT_AZ, JOURNAL_SORT_ZA };
 enum { MODE_GAME, MODE_TITLE, MODE_CINEMA };
 
 typedef struct { float x, y, w, h; } RectFS;
@@ -244,7 +248,8 @@ static RectFS settings_row_r[5], language_chip_r, remap_row_r[6], remap_back_r;
 static RectFS remap_page_r;
 static RectFS screen_row_r[5], screen_back_r;
 static RectFS journal_prev_r, journal_next_r;
-static int journal_page;
+static RectFS journal_subtab_r[3], journal_sort_r;
+static int journal_page, journal_subtab, journal_sort_mode;
 static RectFS cinema_back_r, gameover_load_r, cinema_card_r;
 static bool gameover_panel_shown = true;
 static int gameover_panel_module = -1;
@@ -339,13 +344,20 @@ static bool journal_boss_defeated(int dungeon) {
 }
 static bool journal_reveal_always(void) { return true; }
 static bool journal_zelda_done(void) {
-  // Bit 0x04 is set when Zelda arrives at the Sanctuary; non-Standard starts
-  // can begin after that point and are recognized by the saved progress stage.
+  // SRAM 0xC6.0x04 marks Zelda's arrival at the Sanctuary; progress stage 2
+  // covers non-standard starts that begin after that point.
   return (sram8(0xC6) & 0x04) != 0 || sram8(0xC5) >= 2;
 }
 static bool journal_reveal_sanctuary(void) { return journal_zelda_done(); }
 static bool journal_sanctuary_done(void) { return sram8(0xC5) >= 2; }
-static bool journal_reveal_eastern(void) { return journal_sanctuary_done(); }
+static bool journal_sahasrahla_done(void) {
+  for (int i = 0; i < JournalData_CharacterCount(); i++)
+    if (strcmp(JournalData_CharacterName(i), "Sahasrahla") == 0)
+      return JournalData_CharacterSeen(i) != 0;
+  return false;
+}
+static bool journal_reveal_sahasrahla(void) { return journal_sanctuary_done(); }
+static bool journal_reveal_eastern(void) { return journal_sahasrahla_done(); }
 static bool journal_eastern_done(void) { return journal_boss_defeated(2); }
 static bool journal_reveal_desert(void) { return journal_eastern_done(); }
 static bool journal_desert_done(void) { return journal_boss_defeated(3); }
@@ -356,19 +368,22 @@ static bool journal_sword_done(void) { return sram8(0x59) >= 2; }
 static bool journal_reveal_aga(void) { return journal_sword_done(); }
 static bool journal_aga_done(void) { return journal_boss_defeated(5); }
 static bool journal_reveal_pod(void) { return journal_aga_done(); }
-static bool journal_pod_done(void) { return journal_boss_defeated(6); }
+static bool journal_crystal_or_boss_done(int dungeon, uint8_t mask) {
+  return journal_boss_defeated(dungeon) || (sram8(0x7A) & mask) != 0;
+}
+static bool journal_pod_done(void) { return journal_crystal_or_boss_done(6, 0x02); }
 static bool journal_reveal_swamp(void) { return journal_pod_done(); }
-static bool journal_swamp_done(void) { return journal_boss_defeated(7); }
+static bool journal_swamp_done(void) { return journal_crystal_or_boss_done(7, 0x40); }
 static bool journal_reveal_skull(void) { return journal_swamp_done(); }
-static bool journal_skull_done(void) { return journal_boss_defeated(8); }
+static bool journal_skull_done(void) { return journal_crystal_or_boss_done(8, 0x08); }
 static bool journal_reveal_thieves(void) { return journal_skull_done(); }
-static bool journal_thieves_done(void) { return journal_boss_defeated(9); }
+static bool journal_thieves_done(void) { return journal_crystal_or_boss_done(9, 0x20); }
 static bool journal_reveal_ice(void) { return journal_thieves_done(); }
-static bool journal_ice_done(void) { return journal_boss_defeated(10); }
+static bool journal_ice_done(void) { return journal_crystal_or_boss_done(10, 0x01); }
 static bool journal_reveal_mire(void) { return journal_ice_done(); }
-static bool journal_mire_done(void) { return journal_boss_defeated(11); }
+static bool journal_mire_done(void) { return journal_crystal_or_boss_done(11, 0x04); }
 static bool journal_reveal_turtle(void) { return journal_mire_done(); }
-static bool journal_turtle_done(void) { return journal_boss_defeated(12); }
+static bool journal_turtle_done(void) { return journal_crystal_or_boss_done(12, 0x10); }
 static bool journal_reveal_tower(void) { return journal_turtle_done(); }
 static bool journal_tower_done(void) { return journal_boss_defeated(13); }
 static bool journal_reveal_ganon(void) { return journal_tower_done(); }
@@ -380,7 +395,7 @@ static bool journal_ganon_done(void) {
 static const JournalQuest kJournalQuest[] = {
   {"rescue_zelda", "Rescue Zelda", "Find Zelda in Hyrule Castle.", journal_reveal_always, journal_zelda_done},
   {"sanctuary", "The Sanctuary", "Escape the sewers with Zelda.", journal_reveal_sanctuary, journal_sanctuary_done},
-  {"sahasrahla", "Sahasrahla", "Seek the elder near the Eastern Palace.", journal_reveal_eastern, journal_eastern_done},
+  {"sahasrahla", "Sahasrahla", "Seek the elder near the Eastern Palace.", journal_reveal_sahasrahla, journal_sahasrahla_done},
   {"eastern_palace", "Eastern Palace", "Defeat its boss and claim the pendant.", journal_reveal_eastern, journal_eastern_done},
   {"desert_palace", "Desert Palace", "Find the desert dungeon and clear it.", journal_reveal_desert, journal_desert_done},
   {"tower_of_hera", "Tower of Hera", "Climb the mountain tower.", journal_reveal_hera, journal_hera_done},
@@ -2979,14 +2994,15 @@ static void apply_tap(float x, float y) {
   }
 
   if (tab == TAB_JOURNAL) {
-    if (in_rect(&journal_prev_r, x, y)) {
-      if (journal_page > 0) journal_page--;
-      return;
+    for (int i = 0; i < 3; i++) if (in_rect(&journal_subtab_r[i], x, y)) {
+      if (journal_subtab != i) journal_page = 0;
+      journal_subtab = i; return;
     }
-    if (in_rect(&journal_next_r, x, y)) {
-      journal_page++;
-      return;
+    if (journal_subtab != JOURNAL_QUESTS && in_rect(&journal_sort_r, x, y)) {
+      journal_sort_mode = (journal_sort_mode + 1) % 3; journal_page = 0; return;
     }
+    if (in_rect(&journal_prev_r, x, y)) { if (journal_page > 0) journal_page--; return; }
+    if (in_rect(&journal_next_r, x, y)) { journal_page++; return; }
   }
 
   int requested_tab = tab_at_position(x, y);
@@ -3484,7 +3500,7 @@ static int journal_open_chest_count(int palace) {
 }
 
 static void draw_journal_dungeon_panel(RectFS r, int palace) {
-  RectFS box = {r.x, r.y + 37 * u, r.w, r.h - 39 * u};
+  RectFS box = {r.x, r.y + 48 * u, r.w, r.h - 50 * u};
   fill_round(box.x, box.y, box.w, box.h, 6 * u, COL_BOX_BORDER2);
   fill_round(box.x + 2 * u, box.y + 2 * u, box.w - 4 * u, box.h - 4 * u,
              5 * u, COL_BOX);
@@ -3524,75 +3540,159 @@ static void draw_journal_dungeon_panel(RectFS r, int palace) {
   }
 }
 
-static void draw_journal(RectFS r, bool in_dungeon) {
-  menu_box(r, COL_BOX_BORDER);
-  draw_panel_title(r, UI_Text(kUi_Journal), 8, 8);
+static const char *journal_sort_label(void) {
+  if (journal_sort_mode == JOURNAL_SORT_AZ) return "SORT: A-Z";
+  if (journal_sort_mode == JOURNAL_SORT_ZA) return "SORT: Z-A";
+  return "SORT: CHRONOLOGICAL";
+}
+static uint32_t journal_seen(int chars, int i) {
+  return chars ? JournalData_CharacterSeen(i) : JournalData_BestiarySeen(i);
+}
+static const char *journal_name(int chars, int i) {
+  return chars ? JournalData_CharacterName(i) : JournalData_BestiaryName(i);
+}
+static const char *journal_group(int chars, int i) {
+  return chars ? JournalData_CharacterGroup(i) : JournalData_BestiaryGroup(i);
+}
+static int journal_mapped(int chars, int i) {
+  return chars ? JournalData_CharacterMapped(i) : JournalData_BestiaryMapped(i);
+}
+static bool journal_before(int chars, int a, int b) {
+  if (journal_sort_mode == JOURNAL_SORT_AZ) return strcmp(journal_name(chars, a), journal_name(chars, b)) < 0;
+  if (journal_sort_mode == JOURNAL_SORT_ZA) return strcmp(journal_name(chars, a), journal_name(chars, b)) > 0;
+  uint32_t ta = journal_seen(chars, a), tb = journal_seen(chars, b);
+  if (!ta && tb) return false;
+  if (ta && !tb) return true;
+  if (ta != tb) return ta < tb;
+  return a < b;
+}
+static void journal_sorted(int chars, int *items, int count) {
+  for (int i = 0; i < count; i++) items[i] = i;
+  for (int i = 1; i < count; i++) {
+    int v = items[i], j = i;
+    while (j > 0 && journal_before(chars, v, items[j - 1])) { items[j] = items[j - 1]; --j; }
+    items[j] = v;
+  }
+}
+static void journal_text_fit(const char *s, float x, float y, float maxw, uint32_t color) {
+  char buf[128]; snprintf(buf, sizeof(buf), "%s", s ? s : "");
+  size_t n = strlen(buf);
+  while (n > 3 && tiny_text_width(buf, 1 * u) > maxw) buf[--n] = 0;
+  if (s && strlen(s) > n && n > 3) { buf[n - 2] = '.'; buf[n - 1] = '.'; }
+  draw_tiny_text(buf, x, y, 1 * u, color);
+}
+static void journal_page_controls(RectFS r, int quest_width, bool quests) {
+  if (quests) {
+    journal_prev_r = (RectFS){r.x + 8 * u, r.y + r.h - 40 * u, 40 * u, 40 * u};
+    journal_next_r = (RectFS){r.x + quest_width - 48 * u, r.y + r.h - 40 * u, 40 * u, 40 * u};
+  } else {
+    journal_prev_r = (RectFS){r.x + 3 * u, r.y + 24 * u, 40 * u, r.h - 27 * u};
+    journal_next_r = (RectFS){r.x + r.w - 43 * u, r.y + 24 * u, 40 * u, r.h - 27 * u};
+  }
+  draw_settings_row(&journal_prev_r, false); draw_settings_row(&journal_next_r, false);
+  draw_button_label(journal_prev_r, "<", 1.5f * u); draw_button_label(journal_next_r, ">", 1.5f * u);
+}
+static void draw_journal_catalog(RectFS r, bool chars) {
+  journal_sort_r = (RectFS){r.x + 46 * u, r.y + 47 * u, r.w - 92 * u, 15 * u};
+  draw_settings_row(&journal_sort_r, false); draw_button_label(journal_sort_r, journal_sort_label(), 1 * u);
+  int count = chars ? JournalData_CharacterCount() : JournalData_BestiaryCount();
+  int indices[256]; if (count > 256) count = 256;
+  journal_sorted(chars, indices, count);
+  const int page_size = 2;
+  int pages = (count + page_size - 1) / page_size; if (pages < 1) pages = 1;
+  if (journal_page >= pages) journal_page = pages - 1; if (journal_page < 0) journal_page = 0;
+  float x = r.x + 48 * u, w = r.w - 96 * u, y0 = r.y + 64 * u;
+  for (int row = 0; row < page_size; row++) {
+    int pos = journal_page * page_size + row; if (pos >= count) break;
+    int i = indices[pos]; bool mapped = journal_mapped(chars, i) != 0;
+    uint32_t seen = journal_seen(chars, i);
+    const char *name = journal_name(chars, i), *group = journal_group(chars, i);
+    float y = y0 + row * 34 * u;
+    fill_round(x, y, w, 33 * u, 3 * u, COL(42, 45, 52));
+    journal_text_fit(mapped ? group : "UNMAPPED", x + 4 * u, y + 2 * u, w - 8 * u, COL_GOLD);
+    if (!mapped) {
+      journal_text_fit(name, x + 4 * u, y + 12 * u, w - 8 * u, COL(215, 215, 215));
+      draw_tiny_text("UNMAPPED", x + 4 * u, y + 23 * u, 1 * u, COL(220, 145, 125));
+    } else if (!seen) {
+      draw_tiny_text("???", x + 4 * u, y + 12 * u, 1 * u, COL(200, 200, 200));
+      draw_tiny_text("NOT YET ENCOUNTERED", x + 4 * u, y + 23 * u, 1 * u, COL(160, 160, 160));
+    } else {
+      journal_text_fit(name, x + 4 * u, y + 12 * u, w - 8 * u, COL(245, 245, 245));
+      time_t ts = (time_t)seen; struct tm *tm_local = localtime(&ts);
+      char date[48] = "TIME UNAVAILABLE";
+      if (tm_local) strftime(date, sizeof(date), "%b %d, %Y, %I:%M %p", tm_local);
+      if (chars) journal_text_fit(date, x + 4 * u, y + 23 * u, w - 8 * u, COL(180, 205, 185));
+      else {
+        char status[80];
+        snprintf(status, sizeof(status), "FIRST %s KILLS %lu", date,
+                 (unsigned long)JournalData_BestiaryDefeats(i));
+        journal_text_fit(status, x + 4 * u, y + 23 * u, w - 8 * u, COL(180, 205, 185));
+      }
+    }
+  }
+  char page[24]; snprintf(page, sizeof(page), "%d / %d", journal_page + 1, pages);
+  draw_tiny_text(page, r.x + r.w / 2 - tiny_text_width(page, 1 * u) / 2,
+                 r.y + r.h - 10 * u, 1 * u, COL(185, 185, 185));
+  journal_page_controls(r, (int)r.w, false);
+}
 
+static void draw_journal(RectFS r, bool in_dungeon) {
+  menu_box(r, COL_BOX_BORDER); draw_panel_title(r, UI_Text(kUi_Journal), 8, 8);
+  float x0 = r.x + 8 * u, y0 = r.y + 24 * u, gap = 3 * u;
+  float bw = (r.w - 16 * u - 2 * gap) / 3.0f;
+  const char *labels[3] = {"QUESTS", "CHARACTERS", "BESTIARY"};
+  for (int i = 0; i < 3; i++) {
+    journal_subtab_r[i] = (RectFS){x0 + i * (bw + gap), y0, bw, 23 * u};
+    draw_settings_row(&journal_subtab_r[i], journal_subtab == i);
+    draw_button_label(journal_subtab_r[i], labels[i], 1 * u);
+  }
+  if (journal_subtab != JOURNAL_QUESTS) {
+    draw_journal_catalog(r, journal_subtab == JOURNAL_CHARACTERS);
+    return;
+  }
   int revealed[sizeof(kJournalQuest) / sizeof(kJournalQuest[0])];
-  int revealed_count = 0, current = -1;
+  int nrevealed = 0, current = -1;
   for (int i = 0; i < journal_quest_count(); i++) {
     if (!kJournalQuest[i].reveal()) continue;
-    revealed[revealed_count++] = i;
-    if (!kJournalQuest[i].complete()) current = i;
+    revealed[nrevealed++] = i;
+    if (current < 0 && !kJournalQuest[i].complete()) current = i;
   }
-  int list[sizeof(kJournalQuest) / sizeof(kJournalQuest[0])];
-  int list_count = 0;
-  for (int i = 0; i < revealed_count; i++)
-    if (revealed[i] != current) list[list_count++] = revealed[i];
-
-  float quest_width = in_dungeon ? r.w * 0.55f : r.w - 16 * u;
-  RectFS objective = {r.x + 8 * u, r.y + 37 * u, quest_width - 8 * u, 29 * u};
+  int list[sizeof(kJournalQuest) / sizeof(kJournalQuest[0])], nlist = 0;
+  for (int i = 0; i < nrevealed; i++) if (revealed[i] != current) list[nlist++] = revealed[i];
+  int quest_width = in_dungeon ? (int)(r.w * 0.55f) : (int)(r.w - 16 * u);
+  RectFS objective = {r.x + 8 * u, r.y + 48 * u, quest_width - 8 * u, 31 * u};
   draw_settings_row(&objective, current >= 0);
   if (current >= 0) {
     const JournalQuest *q = &kJournalQuest[current];
-    float title_scale = 2 * u;
-    if (tiny_text_width(q->title, title_scale) > objective.w - 10 * u)
-      title_scale = 1 * u;
-    draw_tiny_text(q->title, objective.x + 5 * u, objective.y + 6 * u,
-                   title_scale, COL_GOLD);
-    draw_tiny_text(q->hint, objective.x + 5 * u, objective.y + 22 * u,
-                   1 * u, COL(225, 225, 225));
-  } else {
-    draw_tiny_text("All known quest beats complete.", objective.x + 5 * u,
-                   objective.y + 11 * u, 1 * u, COL_GOLD);
-  }
-
-  int page_size = 2;
-  int page_count = (list_count + page_size - 1) / page_size;
-  if (page_count < 1) page_count = 1;
-  if (journal_page >= page_count) journal_page = page_count - 1;
-  if (journal_page < 0) journal_page = 0;
-  int first = journal_page * page_size;
-  float rows_y = r.y + 68 * u;
-  for (int row = 0; row < page_size; row++) {
-    int at = first + row;
-    if (at >= list_count) break;
+    float sc = tiny_text_width(q->title, 2 * u) <= objective.w - 10 * u ? 2 * u : 1 * u;
+    draw_tiny_text(q->title, objective.x + 5 * u, objective.y + (sc >= 2 * u ? 3 : 2) * u, sc, COL_GOLD);
+    journal_text_fit(q->hint, objective.x + 5 * u, objective.y + (sc >= 2 * u ? 22 : 14) * u,
+                          objective.w - 10 * u, COL(225, 225, 225));
+  } else draw_tiny_text("ALL KNOWN QUEST BEATS COMPLETE", objective.x + 5 * u,
+                        objective.y + 12 * u, 1 * u, COL_GOLD);
+  int pages = nlist > 0 ? nlist : 1;
+  if (journal_page >= pages) journal_page = pages - 1; if (journal_page < 0) journal_page = 0;
+  int at = journal_page;
+  if (at < nlist) {
     const JournalQuest *q = &kJournalQuest[list[at]];
-    bool done = q->complete();
-    RectFS card = {r.x + 8 * u, rows_y + row * 23 * u,
-                   quest_width - 8 * u, 21 * u};
-    fill_round(card.x, card.y, card.w, card.h, 4 * u, done ? COL(42, 61, 49) : COL(42, 45, 52));
-    draw_tiny_text(done ? "[X]" : "[ ]", card.x + 4 * u, card.y + 3 * u,
-                   1 * u, done ? COL(140, 220, 150) : COL_GOLD);
-    draw_tiny_text(q->title, card.x + 24 * u, card.y + 3 * u,
-                   1 * u, done ? COL(170, 190, 175) : COL(245, 245, 245));
-    draw_tiny_text(q->hint, card.x + 24 * u, card.y + 14 * u,
-                   1 * u, COL(175, 175, 175));
+    RectFS card = {r.x + 8 * u, r.y + 80 * u, quest_width - 8 * u, 22 * u};
+    fill_round(card.x, card.y, card.w, card.h, 4 * u,
+               q->complete() ? COL(42, 61, 49) : COL(42, 45, 52));
+    draw_tiny_text(q->complete() ? "[X]" : "[ ]", card.x + 4 * u, card.y + 6 * u, 1 * u,
+                   q->complete() ? COL(140, 220, 150) : COL_GOLD);
+    float title_scale = tiny_text_width(q->title, 2 * u) <= card.w - 30 * u ? 2 * u : 1 * u;
+    if (title_scale >= 2 * u)
+      draw_tiny_text(q->title, card.x + 24 * u, card.y + 3 * u, title_scale,
+                     q->complete() ? COL(170, 190, 175) : COL(245, 245, 245));
+    else
+      journal_text_fit(q->title, card.x + 24 * u, card.y + 6 * u, card.w - 28 * u,
+                       q->complete() ? COL(170, 190, 175) : COL(245, 245, 245));
   }
-
-  journal_prev_r = (RectFS){r.x + 8 * u, r.y + r.h - 18 * u, 25 * u, 14 * u};
-  journal_next_r = (RectFS){r.x + quest_width - 33 * u, r.y + r.h - 18 * u, 25 * u, 14 * u};
-  draw_settings_row(&journal_prev_r, false);
-  draw_settings_row(&journal_next_r, false);
-  draw_button_label(journal_prev_r, "<", 1.5f * u);
-  draw_button_label(journal_next_r, ">", 1.5f * u);
-  char page_label[16];
-  snprintf(page_label, sizeof(page_label), "%d/%d", journal_page + 1, page_count);
-  draw_tiny_text(page_label,
-                 r.x + quest_width / 2 - tiny_text_width(page_label, 1 * u) / 2,
-                 r.y + r.h - 16 * u, 1 * u, COL(185, 185, 185));
-
-  if (in_dungeon)
+  journal_page_controls(r, quest_width, true);
+  char page[20]; snprintf(page, sizeof(page), "%d/%d", journal_page + 1, pages);
+  draw_tiny_text(page, r.x + quest_width / 2 - tiny_text_width(page, 1 * u) / 2,
+                 r.y + r.h - 10 * u, 1 * u, COL(185, 185, 185));
+  if (in_dungeon && cur_palace >= 0 && cur_palace < 14)
     draw_journal_dungeon_panel((RectFS){r.x + quest_width + 2 * u, r.y,
                                        r.w - quest_width - 10 * u, r.h}, cur_palace);
 }
