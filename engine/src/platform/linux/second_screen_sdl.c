@@ -520,6 +520,9 @@ static SDL_Texture *make_tex(int w, int h, const void *px, bool blend);
 static void draw_tiny_text(const char *s, float x, float y, float sc, uint32_t c);
 static int draw_wrapped_center(const char *text, RectFS area, int scale, uint32_t color);
 static float ui_text_scale(float sc) { return fmaxf(1, floorf(sc + 0.5f)); }
+// Native UI glyphs use integer scales and never shrink below 1x. Keep journal
+// geometry at the same effective scale on 320x240 screens.
+static float journal_layout_unit(void) { return ui_text_scale(u); }
 
 static float text_width(const char *s, float sc) {
 #if defined(__3DS__) || defined(ZELDA3_TEST_3DS_UI)
@@ -3500,15 +3503,17 @@ static int journal_open_chest_count(int palace) {
 }
 
 static void draw_journal_dungeon_panel(RectFS r, int palace) {
-  RectFS box = {r.x, r.y + 48 * u, r.w, r.h - 50 * u};
-  fill_round(box.x, box.y, box.w, box.h, 6 * u, COL_BOX_BORDER2);
-  fill_round(box.x + 2 * u, box.y + 2 * u, box.w - 4 * u, box.h - 4 * u,
-             5 * u, COL_BOX);
-  draw_tiny_text("DUNGEON", box.x + 5 * u, box.y + 5 * u, 1 * u, COL_GOLD);
+  float ju = journal_layout_unit();
+  // Keep the dungeon panel below the enlarged journal sub-tab strip.
+  RectFS box = {r.x, r.y + 76 * ju, r.w, r.h - 78 * ju};
+  fill_round(box.x, box.y, box.w, box.h, 6 * ju, COL_BOX_BORDER2);
+  fill_round(box.x + 2 * ju, box.y + 2 * ju, box.w - 4 * ju, box.h - 4 * ju,
+             5 * ju, COL_BOX);
+  draw_tiny_text("DUNGEON", box.x + 5 * ju, box.y + 5 * ju, ju, COL_GOLD);
   const char *name = kJournalDungeons[palace].name;
-  if (tiny_text_width(name, 1 * u) > box.w - 10 * u)
+  if (tiny_text_width(name, ju) > box.w - 10 * ju)
     name = "DUNGEON";
-  draw_tiny_text(name, box.x + 5 * u, box.y + 17 * u, 1 * u, COL(235, 235, 235));
+  draw_tiny_text(name, box.x + 5 * ju, box.y + 17 * ju, ju, COL(235, 235, 235));
 
   unsigned mask = 0x8000u >> palace;
   const char *labels[6] = {"MAP", "COMPASS", "BIG KEY", "KEYS", "CHESTS", "BOSS"};
@@ -3529,13 +3534,13 @@ static void draw_journal_dungeon_panel(RectFS r, int palace) {
   else
     snprintf(values[5], sizeof(values[5]), "%s", journal_boss_defeated(palace) ? "YES" : "NO");
 
-  float row_y = box.y + 30 * u;
-  float row_h = 10.5f * u;
+  float row_y = box.y + 30 * ju;
+  float row_h = 12 * ju;
   for (int i = 0; i < 6; i++) {
     float y = row_y + i * row_h;
-    draw_tiny_text(labels[i], box.x + 5 * u, y, 1 * u, COL(190, 190, 190));
-    float value_scale = 1 * u;
-    draw_tiny_text(values[i], box.x + box.w - 5 * u - tiny_text_width(values[i], value_scale),
+    draw_tiny_text(labels[i], box.x + 5 * ju, y, ju, COL(190, 190, 190));
+    float value_scale = ju;
+    draw_tiny_text(values[i], box.x + box.w - 5 * ju - tiny_text_width(values[i], value_scale),
                    y, value_scale, i == 5 && strcmp(values[i], "YES") == 0 ? COL_GOLD : COL(245, 245, 245));
   }
 }
@@ -3551,9 +3556,6 @@ static uint32_t journal_seen(int chars, int i) {
 static const char *journal_name(int chars, int i) {
   return chars ? JournalData_CharacterName(i) : JournalData_BestiaryName(i);
 }
-static const char *journal_group(int chars, int i) {
-  return chars ? JournalData_CharacterGroup(i) : JournalData_BestiaryGroup(i);
-}
 static int journal_mapped(int chars, int i) {
   return chars ? JournalData_CharacterMapped(i) : JournalData_BestiaryMapped(i);
 }
@@ -3566,85 +3568,99 @@ static bool journal_before(int chars, int a, int b) {
   if (ta != tb) return ta < tb;
   return a < b;
 }
-static void journal_sorted(int chars, int *items, int count) {
-  for (int i = 0; i < count; i++) items[i] = i;
+static int journal_sorted(int chars, int *items, int capacity) {
+  int total = chars ? JournalData_CharacterCount() : JournalData_BestiaryCount();
+  if (total > capacity) total = capacity;
+  int count = 0;
+  for (int i = 0; i < total; i++) {
+    // Only entries with a runtime mapping and a recorded encounter belong in
+    // the visible journal. Reference placeholders never become list rows.
+    if (!journal_mapped(chars, i) || !journal_seen(chars, i)) continue;
+    items[count++] = i;
+  }
   for (int i = 1; i < count; i++) {
     int v = items[i], j = i;
     while (j > 0 && journal_before(chars, v, items[j - 1])) { items[j] = items[j - 1]; --j; }
     items[j] = v;
   }
+  return count;
 }
 static void journal_text_fit(const char *s, float x, float y, float maxw, uint32_t color) {
+  float ju = journal_layout_unit();
   char buf[128]; snprintf(buf, sizeof(buf), "%s", s ? s : "");
   size_t n = strlen(buf);
-  while (n > 3 && tiny_text_width(buf, 1 * u) > maxw) buf[--n] = 0;
+  while (n > 3 && tiny_text_width(buf, ju) > maxw) buf[--n] = 0;
   if (s && strlen(s) > n && n > 3) { buf[n - 2] = '.'; buf[n - 1] = '.'; }
-  draw_tiny_text(buf, x, y, 1 * u, color);
+  draw_tiny_text(buf, x, y, ju, color);
 }
 static void journal_page_controls(RectFS r, int quest_width, bool quests) {
+  float ju = journal_layout_unit();
   if (quests) {
-    journal_prev_r = (RectFS){r.x + 8 * u, r.y + r.h - 40 * u, 40 * u, 40 * u};
-    journal_next_r = (RectFS){r.x + quest_width - 48 * u, r.y + r.h - 40 * u, 40 * u, 40 * u};
+    journal_prev_r = (RectFS){r.x + 8 * ju, r.y + r.h - 40 * ju, 40 * ju, 40 * ju};
+    journal_next_r = (RectFS){r.x + quest_width - 48 * ju, r.y + r.h - 40 * ju, 40 * ju, 40 * ju};
   } else {
-    journal_prev_r = (RectFS){r.x + 3 * u, r.y + 24 * u, 40 * u, r.h - 27 * u};
-    journal_next_r = (RectFS){r.x + r.w - 43 * u, r.y + 24 * u, 40 * u, r.h - 27 * u};
+    float top = r.y + 97 * ju;
+    float height = r.h - 111 * ju;
+    if (height < 30 * ju) height = 30 * ju;
+    journal_prev_r = (RectFS){r.x + 4 * ju, top, 36 * ju, height};
+    journal_next_r = (RectFS){r.x + r.w - 40 * ju, top, 36 * ju, height};
   }
   draw_settings_row(&journal_prev_r, false); draw_settings_row(&journal_next_r, false);
-  draw_button_label(journal_prev_r, "<", 1.5f * u); draw_button_label(journal_next_r, ">", 1.5f * u);
+  draw_button_label(journal_prev_r, "<", 1.5f * ju); draw_button_label(journal_next_r, ">", 1.5f * ju);
 }
 static void draw_journal_catalog(RectFS r, bool chars) {
-  journal_sort_r = (RectFS){r.x + 46 * u, r.y + 47 * u, r.w - 92 * u, 15 * u};
-  draw_settings_row(&journal_sort_r, false); draw_button_label(journal_sort_r, journal_sort_label(), 1 * u);
-  int count = chars ? JournalData_CharacterCount() : JournalData_BestiaryCount();
-  int indices[256]; if (count > 256) count = 256;
-  journal_sorted(chars, indices, count);
+  float ju = journal_layout_unit();
+  journal_sort_r = (RectFS){r.x + 46 * ju, r.y + 74 * ju, r.w - 92 * ju, 18 * ju};
+  draw_settings_row(&journal_sort_r, false); draw_button_label(journal_sort_r, journal_sort_label(), ju);
+  int indices[256];
+  int count = journal_sorted(chars, indices, 256);
   const int page_size = 2;
   int pages = (count + page_size - 1) / page_size; if (pages < 1) pages = 1;
   if (journal_page >= pages) journal_page = pages - 1; if (journal_page < 0) journal_page = 0;
-  float x = r.x + 48 * u, w = r.w - 96 * u, y0 = r.y + 64 * u;
+  float x = r.x + 48 * ju, w = r.w - 96 * ju, y0 = r.y + 100 * ju;
+  if (count == 0) {
+    journal_page = 0;
+    journal_prev_r = journal_next_r = (RectFS){0, 0, 0, 0};
+    const char *empty = chars ? "No one met yet" : "No enemies recorded yet";
+    draw_tiny_text(empty, x + (w - tiny_text_width(empty, ju)) / 2,
+                   y0 + 10 * ju, ju, COL(190, 190, 190));
+    return;
+  }
   for (int row = 0; row < page_size; row++) {
     int pos = journal_page * page_size + row; if (pos >= count) break;
-    int i = indices[pos]; bool mapped = journal_mapped(chars, i) != 0;
+    int i = indices[pos];
     uint32_t seen = journal_seen(chars, i);
-    const char *name = journal_name(chars, i), *group = journal_group(chars, i);
-    float y = y0 + row * 34 * u;
-    fill_round(x, y, w, 33 * u, 3 * u, COL(42, 45, 52));
-    journal_text_fit(mapped ? group : "UNMAPPED", x + 4 * u, y + 2 * u, w - 8 * u, COL_GOLD);
-    if (!mapped) {
-      journal_text_fit(name, x + 4 * u, y + 12 * u, w - 8 * u, COL(215, 215, 215));
-      draw_tiny_text("UNMAPPED", x + 4 * u, y + 23 * u, 1 * u, COL(220, 145, 125));
-    } else if (!seen) {
-      draw_tiny_text("???", x + 4 * u, y + 12 * u, 1 * u, COL(200, 200, 200));
-      draw_tiny_text("NOT YET ENCOUNTERED", x + 4 * u, y + 23 * u, 1 * u, COL(160, 160, 160));
+    const char *name = journal_name(chars, i);
+    float y = y0 + row * 39 * ju;
+    fill_round(x, y, w, 35 * ju, 3 * ju, COL(42, 45, 52));
+    journal_text_fit(name, x + 5 * ju, y + 4 * ju, w - 10 * ju, COL(245, 245, 245));
+    time_t ts = (time_t)seen; struct tm *tm_local = localtime(&ts);
+    char date[48] = "TIME UNAVAILABLE";
+    if (tm_local) strftime(date, sizeof(date), "%b %d, %Y %I:%M%p", tm_local);
+    if (chars) {
+      journal_text_fit(date, x + 5 * ju, y + 21 * ju, w - 10 * ju, COL(180, 205, 185));
     } else {
-      journal_text_fit(name, x + 4 * u, y + 12 * u, w - 8 * u, COL(245, 245, 245));
-      time_t ts = (time_t)seen; struct tm *tm_local = localtime(&ts);
-      char date[48] = "TIME UNAVAILABLE";
-      if (tm_local) strftime(date, sizeof(date), "%b %d, %Y, %I:%M %p", tm_local);
-      if (chars) journal_text_fit(date, x + 4 * u, y + 23 * u, w - 8 * u, COL(180, 205, 185));
-      else {
-        char status[80];
-        snprintf(status, sizeof(status), "FIRST %s KILLS %lu", date,
-                 (unsigned long)JournalData_BestiaryDefeats(i));
-        journal_text_fit(status, x + 4 * u, y + 23 * u, w - 8 * u, COL(180, 205, 185));
-      }
+      char status[80];
+      snprintf(status, sizeof(status), "KILLS %lu  %s", (unsigned long)JournalData_BestiaryDefeats(i), date);
+      journal_text_fit(status, x + 5 * ju, y + 21 * ju, w - 10 * ju, COL(180, 205, 185));
     }
   }
   char page[24]; snprintf(page, sizeof(page), "%d / %d", journal_page + 1, pages);
-  draw_tiny_text(page, r.x + r.w / 2 - tiny_text_width(page, 1 * u) / 2,
-                 r.y + r.h - 10 * u, 1 * u, COL(185, 185, 185));
+  draw_tiny_text(page, r.x + r.w / 2 - tiny_text_width(page, ju) / 2,
+                 r.y + r.h - 10 * ju, ju, COL(185, 185, 185));
   journal_page_controls(r, (int)r.w, false);
 }
 
 static void draw_journal(RectFS r, bool in_dungeon) {
+  float ju = journal_layout_unit();
   menu_box(r, COL_BOX_BORDER); draw_panel_title(r, UI_Text(kUi_Journal), 8, 8);
-  float x0 = r.x + 8 * u, y0 = r.y + 24 * u, gap = 3 * u;
-  float bw = (r.w - 16 * u - 2 * gap) / 3.0f;
+  float x0 = r.x + 8 * ju, y0 = r.y + 40 * ju, gap = 3 * ju;
+  float bw = (r.w - 16 * ju - 2 * gap) / 3.0f;
   const char *labels[3] = {"QUESTS", "CHARACTERS", "BESTIARY"};
   for (int i = 0; i < 3; i++) {
-    journal_subtab_r[i] = (RectFS){x0 + i * (bw + gap), y0, bw, 23 * u};
+    journal_subtab_r[i] = (RectFS){x0 + i * (bw + gap), y0, bw, 30 * ju};
     draw_settings_row(&journal_subtab_r[i], journal_subtab == i);
-    draw_button_label(journal_subtab_r[i], labels[i], 1 * u);
+    draw_button_label(journal_subtab_r[i], labels[i], ju);
   }
   if (journal_subtab != JOURNAL_QUESTS) {
     draw_journal_catalog(r, journal_subtab == JOURNAL_CHARACTERS);
@@ -3659,42 +3675,43 @@ static void draw_journal(RectFS r, bool in_dungeon) {
   }
   int list[sizeof(kJournalQuest) / sizeof(kJournalQuest[0])], nlist = 0;
   for (int i = 0; i < nrevealed; i++) if (revealed[i] != current) list[nlist++] = revealed[i];
-  int quest_width = in_dungeon ? (int)(r.w * 0.55f) : (int)(r.w - 16 * u);
-  RectFS objective = {r.x + 8 * u, r.y + 48 * u, quest_width - 8 * u, 31 * u};
+  int quest_width = in_dungeon ? (int)(r.w * 0.55f) : (int)(r.w - 16 * ju);
+  RectFS objective = {r.x + 8 * ju, r.y + 76 * ju, quest_width - 8 * ju, 34 * ju};
   draw_settings_row(&objective, current >= 0);
   if (current >= 0) {
     const JournalQuest *q = &kJournalQuest[current];
-    float sc = tiny_text_width(q->title, 2 * u) <= objective.w - 10 * u ? 2 * u : 1 * u;
-    draw_tiny_text(q->title, objective.x + 5 * u, objective.y + (sc >= 2 * u ? 3 : 2) * u, sc, COL_GOLD);
-    journal_text_fit(q->hint, objective.x + 5 * u, objective.y + (sc >= 2 * u ? 22 : 14) * u,
-                          objective.w - 10 * u, COL(225, 225, 225));
-  } else draw_tiny_text("ALL KNOWN QUEST BEATS COMPLETE", objective.x + 5 * u,
-                        objective.y + 12 * u, 1 * u, COL_GOLD);
+    float sc = tiny_text_width(q->title, 2 * ju) <= objective.w - 10 * ju ? 2 * ju : ju;
+    bool large_title = sc >= 2 * ju;
+    draw_tiny_text(q->title, objective.x + 5 * ju, objective.y + (large_title ? 4 : 2) * ju, sc, COL_GOLD);
+    journal_text_fit(q->hint, objective.x + 5 * ju, objective.y + (large_title ? 24 : 15) * ju,
+                     objective.w - 10 * ju, COL(225, 225, 225));
+  } else draw_tiny_text("ALL KNOWN QUEST BEATS COMPLETE", objective.x + 5 * ju,
+                        objective.y + 12 * ju, ju, COL_GOLD);
   int pages = nlist > 0 ? nlist : 1;
   if (journal_page >= pages) journal_page = pages - 1; if (journal_page < 0) journal_page = 0;
   int at = journal_page;
   if (at < nlist) {
     const JournalQuest *q = &kJournalQuest[list[at]];
-    RectFS card = {r.x + 8 * u, r.y + 80 * u, quest_width - 8 * u, 22 * u};
-    fill_round(card.x, card.y, card.w, card.h, 4 * u,
+    RectFS card = {r.x + 8 * ju, r.y + 114 * ju, quest_width - 8 * ju, 30 * ju};
+    fill_round(card.x, card.y, card.w, card.h, 4 * ju,
                q->complete() ? COL(42, 61, 49) : COL(42, 45, 52));
-    draw_tiny_text(q->complete() ? "[X]" : "[ ]", card.x + 4 * u, card.y + 6 * u, 1 * u,
+    draw_tiny_text(q->complete() ? "[X]" : "[ ]", card.x + 4 * ju, card.y + 9 * ju, ju,
                    q->complete() ? COL(140, 220, 150) : COL_GOLD);
-    float title_scale = tiny_text_width(q->title, 2 * u) <= card.w - 30 * u ? 2 * u : 1 * u;
-    if (title_scale >= 2 * u)
-      draw_tiny_text(q->title, card.x + 24 * u, card.y + 3 * u, title_scale,
+    float title_scale = tiny_text_width(q->title, 2 * ju) <= card.w - 30 * ju ? 2 * ju : ju;
+    if (title_scale >= 2 * ju)
+      draw_tiny_text(q->title, card.x + 24 * ju, card.y + 4 * ju, title_scale,
                      q->complete() ? COL(170, 190, 175) : COL(245, 245, 245));
     else
-      journal_text_fit(q->title, card.x + 24 * u, card.y + 6 * u, card.w - 28 * u,
+      journal_text_fit(q->title, card.x + 24 * ju, card.y + 9 * ju, card.w - 28 * ju,
                        q->complete() ? COL(170, 190, 175) : COL(245, 245, 245));
   }
   journal_page_controls(r, quest_width, true);
   char page[20]; snprintf(page, sizeof(page), "%d/%d", journal_page + 1, pages);
-  draw_tiny_text(page, r.x + quest_width / 2 - tiny_text_width(page, 1 * u) / 2,
-                 r.y + r.h - 10 * u, 1 * u, COL(185, 185, 185));
+  draw_tiny_text(page, r.x + quest_width / 2 - tiny_text_width(page, ju) / 2,
+                 r.y + r.h - 10 * ju, ju, COL(185, 185, 185));
   if (in_dungeon && cur_palace >= 0 && cur_palace < 14)
-    draw_journal_dungeon_panel((RectFS){r.x + quest_width + 2 * u, r.y,
-                                       r.w - quest_width - 10 * u, r.h}, cur_palace);
+    draw_journal_dungeon_panel((RectFS){r.x + quest_width + 2 * ju, r.y,
+                                       r.w - quest_width - 10 * ju, r.h}, cur_palace);
 }
 
 static void draw_second_screen(int logic_frames) {
